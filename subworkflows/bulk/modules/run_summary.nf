@@ -14,7 +14,7 @@ process generate_run_summary_bulk {
   tuple val(sample_name), path(GBC_not_corrected)
   tuple val(sample_name), path(GBC_not_corrected_18bp)
   tuple val(sample_name), path(read_count_by_GBC_corrected)
-  tuple val(sample_name), path(good_GBCs)
+  tuple val(sample_name), path(stats_table)
 
   output:
   tuple val(sample_name), path('run_summary.txt'), emit: summary
@@ -41,7 +41,7 @@ process generate_run_summary_bulk {
   echo "- Unique GBCs:" >> run_summary.txt
   echo "  - before error-correction:  \$(zcat ${GBC_not_corrected_18bp} | sort | uniq | wc -l | LC_ALL=en_US.UTF-8 awk '{ printf("%'"'"'d", \$0) }')" >> run_summary.txt
   echo "  - after error-correction (i.e., the used as reference for single-cell): \$(tail -n +2 ${read_count_by_GBC_corrected} | wc -l | LC_ALL=en_US.UTF-8 awk '{ printf("%'"'"'d", \$0) }')" >> run_summary.txt
-  echo "- Good GBCs (i.e., at least 10 cells, inferred from spikeins interpolation):   \$(cat ${good_GBCs} | wc -l | LC_ALL=en_US.UTF-8 awk '{ printf("%'"'"'d", \$0) }')" >> run_summary.txt
+  echo "- Max number of retained GBC: \$(cat ${stats_table} | wc -l | LC_ALL=en_US.UTF-8 awk '{ printf("%'"'"'d", \$0) }')" >> run_summary.txt
   """
 
 }

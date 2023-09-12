@@ -40,15 +40,16 @@ workflow bulk {
         FIND_GBC.out.GBC, 
         REMOVE_SHORT.out.GBC, 
         COUNT.out.read_counts,
-        INFER_PREVALENCES.out.good_GBCs
+        INFER_PREVALENCES.out.stats_table
       )
       publish_bulk(
         CORRECT.out.GBC, 
         COUNT.out.read_counts, 
         WHITELIST.out.whitelist,
         INFER_PREVALENCES.out.stats_table,
-        INFER_PREVALENCES.out.good_GBCs,
-        INFER_PREVALENCES.out.plot,
+        INFER_PREVALENCES.out.prevalences_plot,
+        INFER_PREVALENCES.out.spikeins_plot,
+        INFER_PREVALENCES.out.df_spikeins,
         generate_run_summary_bulk.out.summary
       )
 
