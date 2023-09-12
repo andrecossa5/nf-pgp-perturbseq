@@ -1,1 +1,1 @@
-# nf-pgp-perturbseq
+# New version, supporting multisamples

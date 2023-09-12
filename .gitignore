@@ -1,0 +1,24 @@
+.DS_Store
+
+# Singularity
+step_1/.singularity
+step_2/.singularity
+
+# .nextflow cache and logs
+./step_1/.nexflow*
+./step_2/.nextflow*
+./step_1/work
+./step_2/work
+./step_1/trace.txt
+./step_2/trace.txt
+
+./.cache/*
+
+# Outputs
+./step_*_out
+
+.nextflow*
+trace*
+work
+
+./step_*_out*

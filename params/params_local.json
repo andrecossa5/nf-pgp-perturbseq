@@ -1,0 +1,16 @@
+{
+
+    "bulk_indir" : "/Users/IEO5505/Desktop/example_perturb/data/perturb_bulk",
+    "sc_tenx" : "/Users/IEO5505/Desktop/example_perturb/data/perturb_tenx",
+    "sc_gbc" : "/Users/IEO5505/Desktop/example_perturb/data/perturb_gbc",
+    "bulk_outdir" : "/Users/IEO5505/Desktop/example_perturb/results/perturb_bulk",
+    "sc_outdir" : "/Users/IEO5505/Desktop/example_perturb/results/perturb_sc",
+    "bulk_sc_map" : "/Users/IEO5505/Desktop/example_perturb/data/bulk_sc_map.csv",
+    
+    "sc_pattern" : "TAGCAAACTGGGGCACAAGCTTAATTAAGAATT",
+    "anchor_sequence" : "GGGTTTAAACGGGCCCTCTAG",
+    "spikeins_table" : "/Users/IEO5505/Desktop/example_perturb/data/spikeins_table.csv",
+    "whitelist" : "/Users/IEO5505/Desktop/example_MITO_preprocessing/v3.txt",
+    "ref" : "/Users/IEO5505/Desktop/example_MITO_preprocessing/STARsolo_new/"
+
+}
