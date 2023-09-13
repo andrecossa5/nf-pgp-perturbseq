@@ -132,8 +132,8 @@ def main():
     GBCs = pd.read_csv(path_i, header=None)[0]
     is_18bp = GBCs.map(lambda x: len(x) == 18)
     GBCs = GBCs.loc[is_18bp].copy()
-    GBC_counts = GBCs.value_counts().astype(np.int16)
-    del GBCs # Save memory
+    GBC_counts = GBCs.value_counts().astype(np.int32)
+    del GBCs    # Save memory
 
     # Generate GBC clusters, and reformat
     GBC_counts.index = GBC_counts.index.map(lambda x : x.encode('UTF-8'))
@@ -148,18 +148,18 @@ def main():
         )
         for g in groups
     ]
-    del groups  # Save memory
+    del groups                  # Save memory
     df = pd.concat(df_l)
-    del df_l    # Save memory
+    del df_l                    # Save memory
 
     # Calculate hammings
-    df['hamming'] = [ 
-        hamming(np.array(list(x)), np.array(list(y))) * len(x) \
+    df['hamming'] = [
+        hamming(np.array(list(x)), np.array(list(y))) * 18 \
         for x, y in zip(df['correct'], df['degenerated'])
     ]
 
     # Add counts info to whitelist_df
-    GBC_counts.index = GBC_counts.index.map(lambda x : x.decode('UTF-8')) # Restore to string
+    GBC_counts.index = GBC_counts.index.map(lambda x : x.decode('UTF-8')) # Restore encoding
     df['n_reads_correct'] = GBC_counts.loc[df['correct']].values
     df['n_reads_degenerated'] = GBC_counts.loc[df['degenerated']].values
 
@@ -184,9 +184,9 @@ def main():
     GBC_counts['status'] = np.select(L, values, default='not_whitelisted')
 
     # Save
-    GBC_counts.to_csv('GBC_counts.csv')
-    correction_df.to_csv('correction_df.csv')
-    df.to_csv('whitelist.csv')
+    GBC_counts.to_csv(os.path.join(path_o, 'GBC_counts.csv'))
+    correction_df.to_csv(os.path.join(path_o, 'correction_df.csv'))
+    df.to_csv(os.path.join(path_o, 'whitelist.csv'))
 
 
 ##
