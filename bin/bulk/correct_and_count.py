@@ -92,7 +92,6 @@ min_n_reads = args.min_n_reads
 # Import code
 import numpy as np
 import pandas as pd
-from collections import Counter
 from umi_tools import UMIClusterer
 from scipy.spatial.distance import hamming
 
@@ -168,7 +167,7 @@ def main():
     df = df.query('n_reads_correct>=@min_n_reads and n_reads_correct>=@min_n_reads*n_reads_degenerated')
 
     # To the remaining correct GBCs, add counts from the corresponding degenerated barcodes 
-    # at <= <treshold> hamming.
+    # NB: not from all of them, but only the ones at <= <treshold> hamming distance
     correction_df = df.groupby('correct').apply(lambda x: process_one_GBC(x, threshold))
     GBC_counts.loc[correction_df.index] = correction_df['n_reads_after_correction']
 
