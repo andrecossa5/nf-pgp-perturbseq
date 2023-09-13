@@ -27,7 +27,7 @@ my_parser.add_argument(
     type=str,
     default=None,
     help='''
-        The path to extracted GBCs file. Must be a .tsv/csv file, 
+        The path to extracted GBCs file. Must be a .csv file, 
         with one column. Default: . .
         '''
 )
@@ -47,7 +47,7 @@ my_parser.add_argument(
     '--threshold',
     type=int,
     default=1,
-    help='Maximum Hamming distance for which ... .'
+    help='Maximum Hamming distance for which sequences can be clustered together.'
 )
 
 # treshold
