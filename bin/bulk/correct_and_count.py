@@ -79,11 +79,11 @@ threshold = args.threshold
 min_n_reads = args.min_n_reads
 
 
-# path_i = '/Users/IEO5505/Desktop/prova/GBC_not_corrected.tsv.gz'
-# path_o = '/Users/IEO5505/Desktop/prova'
-# method = 'directional'
-# threshold = 3
-# min_n_reads = 100
+path_i = '/Users/IEO5505/Desktop/prova/GBC_not_corrected.tsv.gz'
+path_o = '/Users/IEO5505/Desktop/prova'
+method = 'directional'
+threshold = 3
+min_n_reads = 100
 
 
 ##
@@ -154,7 +154,7 @@ def main():
 
     # Calculate hammings
     df['hamming'] = [ 
-        hamming(np.array(list(x)), np.array(list(y))) * 18 \
+        hamming(np.array(list(x)), np.array(list(y))) * len(x) \
         for x, y in zip(df['correct'], df['degenerated'])
     ]
 
@@ -170,19 +170,20 @@ def main():
     # To the remaining correct GBCs, add counts from the corresponding degenerated barcodes 
     # at <= <treshold> hamming.
     correction_df = df.groupby('correct').apply(lambda x: process_one_GBC(x, threshold))
+    GBC_counts.loc[correction_df.index] = correction_df['n_reads_after_correction']
 
     # Annotate GBC_counts
-    GBC_counts = GBC_counts.to_frame('n_reads')
+    GBC_counts = GBC_counts.to_frame('read_count')
     L = [
         GBC_counts.index.isin(correction_df.index),
         GBC_counts.index.isin(df['correct']) & ~GBC_counts.index.isin(correction_df.index),
         GBC_counts.index.isin(df.query('hamming<=@threshold')['degenerated']),
-        GBC_counts.index.isin(df.query('hamming>@threshold')['degenerated']),
+        GBC_counts.index.isin(df.query('hamming>@threshold')['degenerated'])
     ]
-    values = [ 'corrected', 'discarded', 'degenerated_to_remove', 'degenerated_to_remove' ]
+    values = [ 'corrected', 'discarded', 'degenerated_to_remove', 'degenerated_not_to_remove' ]
     GBC_counts['status'] = np.select(L, values, default='not_whitelisted')
 
-    # Save all outputs
+    # Save
     GBC_counts.to_csv('GBC_counts.csv')
     correction_df.to_csv('correction_df.csv')
     df.to_csv('whitelist.csv')

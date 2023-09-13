@@ -12,7 +12,7 @@ import argparse
 
 # Create the parser
 my_parser = argparse.ArgumentParser(
-    prog='infer_cline_prevalences',
+    prog='infer_clone_prevalences',
     description=
     """
     Script for final inference of clone prevalence from each sample bulk GBC counts.
@@ -26,8 +26,8 @@ my_parser.add_argument(
     '-i', 
     '--input', 
     type=str,
-    default=os.getcwd(),
-    help='The path to raw barcodes counts. Default: . .'
+    default=None,
+    help='The path to GBC_counts.csv file. Default: . .'
 )
 
 # Output
@@ -64,6 +64,16 @@ my_parser.add_argument(
     type=int,
     default=1000,
     help='Min n_reads to retain a GBC.'
+)
+
+# Include degenerated
+my_parser.add_argument(
+    '--with_degenerated', 
+    action='store_true',
+    help='''
+        Include degenerated barcodes that were whitelisted, but were at a Hamming 
+        distance > than the treshold chosen. Default: False.
+        '''
 )
 
 
@@ -200,8 +210,14 @@ def plot_prevalences(df):
 
 def main():
 
-    # Read counts
-    df_counts = pd.read_csv(os.path.join(path_i, 'read_count_by_GBC_corrected.tsv'), sep='\t', index_col=0)
+    # Read GBC_counts
+    df_counts = pd.read_csv(path_i, index_col=0)
+
+    # Filter GBCs
+    allowed_status = ['corrected', 'not_whitelisted']
+    if args.with_degenerated:
+        allowed_status.append('degenerated_not_to_remove')
+    df_counts = df_counts.loc[df_counts['status'].isin(allowed_status)]
 
     # With spikeins
     if path_spikeins_table is not None:

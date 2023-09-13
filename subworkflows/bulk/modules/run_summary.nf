@@ -11,10 +11,15 @@ process generate_run_summary_bulk {
 
   input:
   tuple val(sample_name), path(reads)
-  tuple val(sample_name), path(GBC_not_corrected)
+  tuple val(sample_name), path(counts)
   tuple val(sample_name), path(GBC_not_corrected_18bp)
   tuple val(sample_name), path(read_count_by_GBC_corrected)
   tuple val(sample_name), path(stats_table)
+
+        FIND_GBC.out.GBC, 
+        REMOVE_SHORT.out.GBC, 
+        COUNT.out.read_counts,
+        INFER_PREVALENCES.out.stats_table
 
   output:
   tuple val(sample_name), path('run_summary.txt'), emit: summary
