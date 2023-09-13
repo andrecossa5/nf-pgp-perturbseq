@@ -79,11 +79,11 @@ threshold = args.threshold
 min_n_reads = args.min_n_reads
 
 
-path_i = '/Users/IEO5505/Desktop/prova/GBC_not_corrected.tsv.gz'
-path_o = '/Users/IEO5505/Desktop/prova'
-method = 'directional'
-threshold = 3
-min_n_reads = 100
+# path_i = '/Users/IEO5505/Desktop/prova/GBC_not_corrected.tsv.gz'
+# path_o = '/Users/IEO5505/Desktop/prova'
+# method = 'directional'
+# threshold = 3
+# min_n_reads = 100
 
 
 ##
