@@ -18,11 +18,10 @@ process WHITELIST {
   script:
   """
   python3 \
-  ${baseDir}/bin/bulk/generate_GBC_whitelist.py \
-  --input ${GBC_not_corrected_18bp} \
+  ${baseDir}/bin/bulk/GBC_clustering.py \
+  --i ${GBC_not_corrected_18bp} \
   --method cluster \
-  --threshold 1 \
-  --output GBC_whitelist.tsv
+  --threshold 1
   """
 
   stub:

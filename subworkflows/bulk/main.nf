@@ -27,34 +27,35 @@ workflow bulk {
       SEARCH_PATTERNS()
       EXTRACT_READS(ch_input)
       FIND_GBC(SEARCH_PATTERNS.out.search_patterns, EXTRACT_READS.out.reads)
-      REMOVE_SHORT(FIND_GBC.out.GBC)
-      WHITELIST(REMOVE_SHORT.out.GBC)
-      FORMAT_WHITELIST(WHITELIST.out.whitelist)
-      CORRECT(REMOVE_SHORT.out.GBC, FORMAT_WHITELIST.out.formatted_whitelist)
-      COUNT(CORRECT.out.GBC, WHITELIST.out.whitelist, REMOVE_SHORT.out.GBC)
-      INFER_PREVALENCES(COUNT.out.read_counts)
+      CORRECT_GBC(FIND_GBC.out.GBC)
+      // REMOVE_SHORT(FIND_GBC.out.GBC)
+      // WHITELIST(REMOVE_SHORT.out.GBC)
+      // FORMAT_WHITELIST(WHITELIST.out.whitelist)
+      // CORRECT(REMOVE_SHORT.out.GBC, FORMAT_WHITELIST.out.formatted_whitelist)
+      // COUNT(CORRECT.out.GBC, WHITELIST.out.whitelist, REMOVE_SHORT.out.GBC)
+      // INFER_PREVALENCES(COUNT.out.read_counts)
 
       // Summary and cleanup
-      generate_run_summary_bulk(
-        EXTRACT_READS.out.reads, 
-        FIND_GBC.out.GBC, 
-        REMOVE_SHORT.out.GBC, 
-        COUNT.out.read_counts,
-        INFER_PREVALENCES.out.stats_table
-      )
-      publish_bulk(
-        CORRECT.out.GBC, 
-        COUNT.out.read_counts, 
-        WHITELIST.out.whitelist,
-        INFER_PREVALENCES.out.stats_table,
-        INFER_PREVALENCES.out.prevalences_plot,
-        INFER_PREVALENCES.out.spikeins_plot,
-        INFER_PREVALENCES.out.df_spikeins,
-        generate_run_summary_bulk.out.summary
-      )
+      // generate_run_summary_bulk(
+      //   EXTRACT_READS.out.reads, 
+      //   FIND_GBC.out.GBC, 
+      //   REMOVE_SHORT.out.GBC, 
+      //   COUNT.out.read_counts,
+      //   INFER_PREVALENCES.out.stats_table
+      // )
+      // publish_bulk(
+      //   CORRECT.out.GBC, 
+      //   COUNT.out.read_counts, 
+      //   WHITELIST.out.whitelist,
+      //   INFER_PREVALENCES.out.stats_table,
+      //   INFER_PREVALENCES.out.prevalences_plot,
+      //   INFER_PREVALENCES.out.spikeins_plot,
+      //   INFER_PREVALENCES.out.df_spikeins,
+      //   generate_run_summary_bulk.out.summary
+      // )
 
   emit:
-      read_counts = COUNT.out.read_counts
-      summary = generate_run_summary_bulk.out.summary
+      // read_counts = COUNT.out.read_counts
+      // summary = generate_run_summary_bulk.out.summary
 
 }

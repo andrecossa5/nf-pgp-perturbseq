@@ -79,7 +79,7 @@ cumsum = args.cumsum
 n_reads = args.n_reads
 
 
-##
+########################################################################
 
 
 # Import code
@@ -89,11 +89,6 @@ from scipy.interpolate import interp1d
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-
-##
-
-
-########################################################################
 
 # Define helper functions
 
@@ -164,7 +159,7 @@ def filter_GBCs(df_counts, df_spike=None, f=None, path_o=None, use_spike=True, c
         read_count_cumsum = df['read_count'].cumsum()
         t = np.percentile(read_count_cumsum, cumsum)
         gbc_to_retain = read_count_cumsum.loc[lambda x: x<=t].index
-        df = df.loc[gbc_to_retain].query('read_count>@n_reads')
+        df = df.loc[gbc_to_retain].query('read_count>@n_reads')                             # Filter
         df['cellular_prevalence'] = df['log10_read_count'] / df['log10_read_count'].sum()
         df = df.loc[:, ~df.columns.str.contains('log_10|cells')]
 
