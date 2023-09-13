@@ -23,6 +23,10 @@ process generate_run_summary_bulk {
   python3 \
   ${baseDir}/bin/bulk/create_run_summary.py \
   --reads ${reads} \
+  --indir ${params.indir} \
+  --outdir ${params.outdir} \
+  --anchor_sequence ${params.anchor_sequence} \
+  --sample ${sample} \
   --read_counts ${read_counts} \
   --correction_df ${correction_df} \
   --stats_table ${stats_table} 
