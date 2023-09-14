@@ -88,6 +88,12 @@ path_spikeins_table = args.path_spikeins_table
 cumsum = args.cumsum
 n_reads = args.n_reads
 
+# path_i = '/Users/IEO5505/Desktop/prova/prova/Li1/GBC_counts.csv'
+# path_o = os.getcwd()
+# path_spikeins_table = '/Users/IEO5505/Desktop/prova/prova/Li1/spikeins_table.csv' 
+# cumsum = 75
+# n_reads = 100
+
 
 ########################################################################
 
@@ -259,9 +265,9 @@ def main():
     df_without = filter_GBCs(df_counts, path_o=path_o, use_spike=False, cumsum=cumsum, n_reads=n_reads)
 
     # Merge info
-    df = (
+    `df` = (
         df_without
-        .join(df_with.loc[:,['cellular_prevalence']], rsuffix='_wo', lsuffix='_wi', how='outer')
+        .join(df_with.loc[:,['cellular_prevalence']], lsuffix='_wo', rsuffix='_wi', how='outer')
         .assign(
             found_wi=lambda x: ~x['cellular_prevalence_wi'].isna(),
             found_wo=lambda x: ~x['cellular_prevalence_wo'].isna()

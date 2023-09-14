@@ -113,14 +113,14 @@ path_o = args.output
 
 
 
-# path_reads = '/Users/IEO5505/Desktop/prova/GBC_not_corrected.tsv.gz'
-# path_read_counts = '/Users/IEO5505/Desktop/prova/GBC_counts.csv'
-# path_correction_df = '/Users/IEO5505/Desktop/prova/correction_df.csv'
-# stats_table = '/Users/IEO5505/Desktop/prova/whitelist.csv'
-# indir = '/Users/IEO5505/Desktop/prova/'
-# outdir = '/Users/IEO5505/Desktop/prova/'
-# anchor_sequence = 'AAAAAAAA'
-# sample = 'Sample_a'
+path_reads = '/Users/IEO5505/Desktop/prova/prova/Li1/GBC_corrected.tsv.gz'
+path_read_counts = '/Users/IEO5505/Desktop/prova/prova/Li1/GBC_counts.csv'
+path_correction_df = '/Users/IEO5505/Desktop/prova/prova/Li1/correction_df.csv'
+stats_table = '/Users/IEO5505/Desktop/prova/prova/Li1/clonal_prevalences.csv'
+indir = '/Users/IEO5505/Desktop/prova/'
+outdir = '/Users/IEO5505/Desktop/prova'
+anchor_sequence = 'AAAAAAAA'
+sample = 'Sample_a'
 
 
 ##
@@ -196,10 +196,10 @@ def main():
     f.write(f'  o not_whitelisted:              {n_not_whitelisted} \n')
     f.write(f'  o degenerated, removed:         {n_degenerated_removed} \n')
     f.write(f'  o degenerated, not removed :    {n_degenerated_not_removed} \n')
-    f.write(f'- Correction:                          \n ')
+    f.write(f'- Correction:                          \n')
     f.write(f'  o Median n degenerated GBCs:    {median_n_degenerated:.2f} \n')
     f.write(f'  o Median n added reads:         {median_n_reads_added:.2f} \n')
-    f.write(f'- Clonal inference:                    \n ')
+    f.write(f'- Clonal inference:                    \n')
     f.write(f'  o  w/i spikeins:                {n_unique_wi} unique clones, median prevalence {median_pr_wi:.2f}  \n')
     f.write(f'  o  w/o spikeins:                {n_unique_wo} unique clones, median prevalence {median_pr_wo:.2f}  \n')
     f.write('\n')

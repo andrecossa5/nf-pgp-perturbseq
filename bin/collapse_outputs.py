@@ -45,13 +45,14 @@ args = my_parser.parse_args()
 path_input = args.input
 path_output = args.output
 
+# path_input = '/Users/IEO5505/Desktop/prova/prova'
+# path_output = '/Users/IEO5505/Desktop/prova'
 
 ##
 
 
 # Import code
 import os
-import sys
 import numpy as np
 import pandas as pd
 import shutil
@@ -63,21 +64,13 @@ from Cellula._utils import *
 
 
 # Helpers
-def concat_df(path_input, folder_d, string_pattern, sep=','):
+def concat_df(path_input, folder_d, string_pattern):
 
 	L = []
 	for name in folder_d:
-		
 		path_ = os.path.join(path_input, name)
-		if sep == '\t':
-			df_ = pd.read_csv(os.path.join(path_, f'{string_pattern}.tsv'), index_col=0, sep=sep)
-		elif sep == ',':
-			df_ = pd.read_csv(os.path.join(path_, f'{string_pattern}.csv'), index_col=0)
-		else:
-			print(f'{sep} does not work!')
-			df_ = None
+		df_ = pd.read_csv(os.path.join(path_, f'{string_pattern}.csv'), index_col=0)
 		L.append(df_.assign(sample=name))
-	
 	df = pd.concat(L)
 
 	return df 
@@ -105,7 +98,7 @@ def main():
 			folder_d[name] = path_
 
 	# all_summary
-	with open(os.path.join(path_output, 'all_summary.txt'), 'wb') as outfile:
+	with open(os.path.join(path_output, 'summary', 'all_summary.txt'), 'wb') as outfile:
 		for name in folder_d:
 			outfile.write('\n'.encode())
 			outfile.write('-------------------------------------'.encode())
@@ -130,11 +123,18 @@ def main():
 		.to_csv(os.path.join(path_output, 'summary', 'all_prevalences.csv'))
 	)
 	# all read_counts df	
-	(
-		concat_df(path_input, folder_d, 'read_count_by_GBC_corrected', sep='\t')
-		.to_csv(os.path.join(path_output, 'summary', 'all_read_counts.csv'))
-	)
+	df_correction = concat_df(path_input, folder_d, 'correction_df')
+	df_spikeins = concat_df(path_input, folder_d, 'df_spikeins')
 
+	# Write spikeins correction df
+	spikeins = df_spikeins.index.unique()
+	df_ = (
+		df_correction.loc[spikeins]
+		.join(df_spikeins.loc[:,['n_cells']])
+		.drop_duplicates()
+		.sort_values('n_cells', ascending=False)
+		.to_csv(os.path.join(path_output, 'summary', 'spikeins_correction.csv'))
+	)
 
 ##
 
