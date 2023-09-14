@@ -23,8 +23,8 @@ process generate_run_summary_bulk {
   python3 \
   ${baseDir}/bin/bulk/create_run_summary.py \
   --reads ${reads} \
-  --indir ${params.indir} \
-  --outdir ${params.outdir} \
+  --indir ${params.bulk_indir} \
+  --outdir ${params.bulk_outdir} \
   --anchor_sequence ${params.anchor_sequence} \
   --sample ${sample} \
   --read_counts ${read_counts} \

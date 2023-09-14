@@ -29,7 +29,7 @@ workflow bulk {
       // Summary and cleanup
       generate_run_summary_bulk(
         EXTRACT_READS.out.reads, 
-        CORRECT_AND_COUNT.out.read_counts,
+        CORRECT_AND_COUNT.out.counts,
         CORRECT_AND_COUNT.out.correction_df,
         INFER_PREVALENCES.out.stats_table
       )

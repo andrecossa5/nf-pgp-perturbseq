@@ -44,7 +44,7 @@ my_parser.add_argument(
     '--outdir', 
     type=str,
     default=None,
-    help='Path to input directory: params.outdir.'
+    help='Path to input directory: params.bulk_outdir.'
 )
 
 # anchor_sequence
@@ -147,7 +147,6 @@ def main():
     with open(path_reads, 'rb') as f:
         for r in f:
             total_reads += 1
-
     # Others
     df_ = pd.read_csv(path_read_counts, index_col=0)
     total_GBC_reads = df_['read_count'].sum()

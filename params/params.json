@@ -1,0 +1,13 @@
+{
+
+    "bulk_indir" : "/Users/IEO5505/Desktop/prova/pp/data/perturb_bulk",
+    "bulk_outdir" : "/Users/IEO5505/Desktop/prova/pp/results/perturb_bulk",
+    "bulk_sc_map" : "/Users/IEO5505/Desktop/prova/bulk_sc_map.csv",
+    "hamming_distance_treshold" : 3,
+    "min_n_reads_treshold" : 100,
+    
+    "sc_pattern" : "TAGCAAACTGGGGCACAAGCTTAATTAAGAATT",
+    "anchor_sequence" : "GGGTTTAAACGGGCCCTCTAG",
+    "spikeins_table" : "/Users/IEO5505/Desktop/prova/meta/spikeins_table.csv"
+
+}
