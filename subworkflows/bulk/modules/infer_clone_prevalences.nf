@@ -22,7 +22,7 @@ process INFER_PREVALENCES {
   """
   python3 \
   ${baseDir}/bin/bulk/infer_clone_prevalences.py \
-  -i ${counts}
+  -i ${counts} \
   --path_spikeins_table ${params.spikeins_table}
   """
 
