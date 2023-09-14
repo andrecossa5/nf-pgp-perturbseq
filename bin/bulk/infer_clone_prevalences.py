@@ -265,7 +265,7 @@ def main():
     df_without = filter_GBCs(df_counts, path_o=path_o, use_spike=False, cumsum=cumsum, n_reads=n_reads)
 
     # Merge info
-    `df` = (
+    df = (
         df_without
         .join(df_with.loc[:,['cellular_prevalence']], lsuffix='_wo', rsuffix='_wi', how='outer')
         .assign(
