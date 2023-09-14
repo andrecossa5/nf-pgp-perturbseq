@@ -72,8 +72,8 @@ my_parser.add_argument(
 
 # Parse arguments
 args = my_parser.parse_args()
-path_i = args.path_input
-path_o = args.path_output
+path_i = args.input
+path_o = args.output
 method = args.method
 threshold = args.threshold
 min_n_reads = args.min_n_reads
