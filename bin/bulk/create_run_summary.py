@@ -112,15 +112,14 @@ stats_table = args.stats_table
 path_o = args.output
 
 
-
-path_reads = '/Users/IEO5505/Desktop/prova/prova/Li1/GBC_corrected.tsv.gz'
-path_read_counts = '/Users/IEO5505/Desktop/prova/prova/Li1/GBC_counts.csv'
-path_correction_df = '/Users/IEO5505/Desktop/prova/prova/Li1/correction_df.csv'
-stats_table = '/Users/IEO5505/Desktop/prova/prova/Li1/clonal_prevalences.csv'
-indir = '/Users/IEO5505/Desktop/prova/'
-outdir = '/Users/IEO5505/Desktop/prova'
-anchor_sequence = 'AAAAAAAA'
-sample = 'Sample_a'
+# path_reads = '/Users/IEO5505/Desktop/prova/prova/Li1/GBC_corrected.tsv.gz'
+# path_read_counts = '/Users/IEO5505/Desktop/prova/prova/Li1/GBC_counts.csv'
+# path_correction_df = '/Users/IEO5505/Desktop/prova/prova/Li1/correction_df.csv'
+# stats_table = '/Users/IEO5505/Desktop/prova/prova/Li1/clonal_prevalences.csv'
+# indir = '/Users/IEO5505/Desktop/prova/'
+# outdir = '/Users/IEO5505/Desktop/prova'
+# anchor_sequence = 'AAAAAAAA'
+# sample = 'Sample_a'
 
 
 ##
