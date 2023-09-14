@@ -26,7 +26,7 @@ process generate_run_summary_bulk {
   --indir ${params.bulk_indir} \
   --outdir ${params.bulk_outdir} \
   --anchor_sequence ${params.anchor_sequence} \
-  --sample ${sample} \
+  --sample ${sample_name} \
   --read_counts ${read_counts} \
   --correction_df ${correction_df} \
   --stats_table ${stats_table} 
