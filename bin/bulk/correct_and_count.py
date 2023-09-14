@@ -61,7 +61,7 @@ my_parser.add_argument(
 # treshold
 my_parser.add_argument(
     '--min_n_reads',
-    type=str,
+    type=int,
     default=100,
     help='min_n_reads that a GBCs must have to be considered in the final counts. Default: 100.'
 )
