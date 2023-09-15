@@ -88,11 +88,11 @@ path_spikeins_table = args.path_spikeins_table
 cumsum = args.cumsum
 n_reads = args.n_reads
 
-path_i = '/Users/IEO5505/Desktop/prova/prova/Li1/GBC_counts.csv'
-path_o = os.getcwd()
-path_spikeins_table = '/Users/IEO5505/Desktop/prova/prova/Li1/spikeins_table.csv' 
-cumsum = 75
-n_reads = 100
+# path_i = '/Users/IEO5505/Desktop/prova/prova/Li1/GBC_counts.csv'
+# path_o = os.getcwd()
+# path_spikeins_table = '/Users/IEO5505/Desktop/prova/prova/Li1/spikeins_table.csv' 
+# cumsum = 75
+# n_reads = 100
 
 
 ########################################################################
