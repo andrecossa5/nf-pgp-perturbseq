@@ -216,7 +216,7 @@ def plot_prevalences(df):
 
 def main():
 
-    # Read GBC_counts
+    # Read counts
     df_counts = pd.read_csv(path_i, index_col=0)
 
     # Filter GBCs
