@@ -16,6 +16,7 @@ process CORRECT_AND_COUNT {
   tuple val(sample_name), path('GBC_counts.csv'), emit: counts
   tuple val(sample_name), path('correction_df.csv'), emit: correction_df
   tuple val(sample_name), path('whitelist.csv'), emit: whitelist
+  tuple val(sample_name), path('logs.txt'), emit: logs
 
   script:
   """
@@ -33,6 +34,7 @@ process CORRECT_AND_COUNT {
   touch GBC_counts.csv
   touch correction_df.csv
   touch whitelist.csv
+  touch logs.txt
   """
 
 }
