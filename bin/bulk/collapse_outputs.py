@@ -279,9 +279,8 @@ def main():
 	df_spikeins = concat_df(path_input, folder_d, 'df_spikeins')
 
 	# Write spikeins correction df
-	spikeins = df_spikeins.index.unique()
 	df_ = (
-		df_correction.loc[spikeins]
+		df_correction.loc[df_correction.index.isin(df_spikeins.index)]
 		.join(df_spikeins.loc[:,['n_cells']])
 		.drop_duplicates()
 		.sort_values('n_cells', ascending=False)
@@ -326,8 +325,6 @@ def main():
 	##
 
 	# Common
-
-
 	fig, axs = plt.subplots(1,2,figsize=(11, 5.5))
 	df_ = find_common_clones(df_prevalences, wi_spikeins=True)
 	plot_heatmap(
