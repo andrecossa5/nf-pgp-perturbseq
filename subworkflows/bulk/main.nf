@@ -44,10 +44,10 @@ workflow bulk {
         INFER_PREVALENCES.out.df_spikeins,
         generate_run_summary_bulk.out.summary
       )
-      collapse_output()
+      // collapse_output(publish_bulk.out.finish_flag.collect())
 
   emit:
-      read_counts = CORRECT_AND_COUNT.out.counts
+      flags = publish_bulk.out.finish_flag.collect()
       summary = generate_run_summary_bulk.out.summary
 
 }

@@ -30,6 +30,7 @@ process publish_bulk {
   path spikeins_plot
   path df_spikeins
   path run_summary
+  val sample_name, emit: finish_flag
 
   script:
   """
