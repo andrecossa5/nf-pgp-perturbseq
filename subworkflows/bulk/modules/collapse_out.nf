@@ -12,6 +12,9 @@ process collapse_output {
   input:
   val last
 
+  output:
+  val path
+
   script:
   """
   python3 \
