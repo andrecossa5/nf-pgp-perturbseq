@@ -50,6 +50,5 @@ workflow bulk {
 
   emit:
       flags = publish_bulk.out.finish_flag.collect()
-      summary = generate_run_summary_bulk.out.summary
 
 }

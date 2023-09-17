@@ -37,7 +37,6 @@ map_bulk_sc = Channel
 workflow bulk_only {
 
     bulk(ch_input_bulk)
-    bulk.out.summary.view()
     bulk.out.flags.view()
 
 }
