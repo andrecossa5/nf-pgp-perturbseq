@@ -12,9 +12,6 @@ process collapse_output {
   input:
   val last
 
-  output:
-  path summary
-
   script:
   """
   python3 \
@@ -26,7 +23,6 @@ process collapse_output {
   stub:
   """
   echo "Collapsing output in ${params.bulk_outdir}..."
-  mkdir summary
   """
 
 }
