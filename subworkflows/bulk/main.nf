@@ -27,7 +27,7 @@ workflow bulk {
       CORRECT_AND_COUNT(FIND_GBC.out.GBC)
       INFER_PREVALENCES(CORRECT_AND_COUNT.out.counts)
 
-      // Summary and cleanup
+      // Summary and cleanup 
       generate_run_summary_bulk(
         EXTRACT_READS.out.reads, 
         CORRECT_AND_COUNT.out.counts,

@@ -7,7 +7,7 @@ nextflow.enable.dsl = 2
 process collapse_output {
 
   // Publish
-  publishDir "${params.bulk_outdir}/summary", mode: 'copy'
+  publishDir "${params.bulk_outdir}", mode: 'copy'
 
   input:
   val last
@@ -24,6 +24,7 @@ process collapse_output {
   stub:
   """
   echo "Collapsing output in ${params.bulk_outdir}..."
+  mkdir summary
   """
 
 }

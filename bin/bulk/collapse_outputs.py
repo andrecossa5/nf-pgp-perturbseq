@@ -36,7 +36,9 @@ my_parser.add_argument(
 	'--output', 
 	type=str,
 	default=os.getcwd(),
-	help='The path to the output folder of choice. Default: os.getcwd().'
+	help='''
+		The path to the output folder of choice. Default: os.getcwd().
+		'''
 )
  
  
@@ -47,14 +49,13 @@ path_output = args.output
 
 ##
 
-# path_input = '/Users/IEO5505/Desktop/prova/prova'
-# path_output = '/Users/IEO5505/Desktop/prova'
+# path_input = '/Users/IEO5505/Desktop/example_perturb/step_1_out'
+# path_output = '/Users/IEO5505/Desktop/example_perturb/step_1_out'
 
 ##
 
 
 # Import code
-import os
 import numpy as np
 import pandas as pd
 import shutil
@@ -87,9 +88,8 @@ def get_folder_d(path_input):
 		
 	folder_d = {}
 	for name in os.listdir(path_input):
-		path_ = os.path.join(path_input, name)
-		if not os.path.islink(path_) and name != '.DS_Store':
-			folder_d[name] = path_
+		if name != '.DS_Store' and name != 'summary':
+			folder_d[name] = os.path.join(path_input, name)
 
 	return folder_d
 
@@ -141,14 +141,14 @@ def write_correction_summary(path_input, path_output, folder_d):
 		f.write('\n')
 		f.write('- All numbers presented across sample (median +- std): \n')
 		f.write('\n')
-		f.write(f' o n unique barcodes (all barcodes): {df["n"].median():.2f} (+-{df["n"].std():.2f}) \n')
-		f.write(f' o J.I. clones inferred w/i and w/o spikeins: {df["JI"].median():.2f} (+-{df["JI"].std():.2f}) \n')
-		f.write(f' o % of corrected barcodes: {df["perc_corrected"].median():.2f} (+-{df["perc_corrected"].std():.2f}) \n')
-		f.write(f' o % reads added at correction: {df["perc_added_reads"].median():.2f} (+-{df["perc_added_reads"].std():.2f}) \n')
+		f.write(f' * n unique barcodes (all barcodes): {df["n"].median():.2f} (+-{df["n"].std():.2f}) \n')
+		f.write(f' * J.I. clones inferred w/i and w/o spikeins: {df["JI"].median():.2f} (+-{df["JI"].std():.2f}) \n')
+		f.write(f' * % of corrected barcodes: {df["perc_corrected"].median():.2f} (+-{df["perc_corrected"].std():.2f}) \n')
+		f.write(f' * % reads added at correction: {df["perc_added_reads"].median():.2f} (+-{df["perc_added_reads"].std():.2f}) \n')
 		f.write('\n')
 		f.write('- Cellular prevalences correlation (i.e., common clones detected w/i and w/o spikeins): \n')
-		f.write(f' o Pearson\'s correlation: {df["pearson"].median():.2f} (+-{df["pearson"].std():.2f}) \n')
-		f.write(f' o Spearman\'s correlation: {df["spearman"].median():.2f} (+-{df["spearman"].std():.2f}) \n')
+		f.write(f' * Pearson\'s correlation: {df["pearson"].median():.2f} (+-{df["pearson"].std():.2f}) \n')
+		f.write(f' * Spearman\'s correlation: {df["spearman"].median():.2f} (+-{df["spearman"].std():.2f}) \n')
 		f.write('\n')
 
 

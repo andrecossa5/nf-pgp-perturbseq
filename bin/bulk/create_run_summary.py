@@ -116,6 +116,7 @@ path_o = args.output
 
 
 # Import code
+import gzip
 import getpass
 import datetime
 import numpy as np
@@ -132,10 +133,8 @@ def main():
     # Calculate stats
 
     # Total reads
-    total_reads = 0
-    with open(path_reads, 'rb') as f:
-        for r in f:
-            total_reads += 1
+    total_reads = pd.read_csv(path_reads, header=None).shape[0]
+
     # Others
     df_ = pd.read_csv(path_read_counts, index_col=0)
     total_GBC_reads = df_['read_count'].sum()
@@ -170,7 +169,7 @@ def main():
     f.write('Overview: \n')
     f.write(f'- Date of analysis:               {datetime.datetime.now().strftime("%d-%m-%Y")} \n')
     f.write(f'- User:                           {getpass.getuser()} \n')
-    f.write(f'- Working directory:              {os.getcwd()} \n')
+    f.write(f'- Working directory:              {os.getcwd().split("/")[:-2]} \n')
     f.write('\n')
     f.write(f'Parameters \n')
     f.write(f'--indir:                          {indir} \n')
@@ -181,16 +180,16 @@ def main():
     f.write(f'- Reads in input:                 {total_reads} \n')
     f.write(f'- Reads with GBC:                 {total_GBC_reads} \n')
     f.write(f'- Unique GBCs:                    {n_unique_GBCs} \n')
-    f.write(f'  o corrected:                    {n_corrected} \n')
-    f.write(f'  o not_whitelisted:              {n_not_whitelisted} \n')
-    f.write(f'  o degenerated, removed:         {n_degenerated_removed} \n')
-    f.write(f'  o degenerated, not removed :    {n_degenerated_not_removed} \n')
+    f.write(f'  * corrected:                    {n_corrected} \n')
+    f.write(f'  * not_whitelisted:              {n_not_whitelisted} \n')
+    f.write(f'  * degenerated, removed:         {n_degenerated_removed} \n')
+    f.write(f'  * degenerated, not removed :    {n_degenerated_not_removed} \n')
     f.write(f'- Correction:                          \n')
-    f.write(f'  o Median n degenerated GBCs:    {median_n_degenerated:.2f} \n')
-    f.write(f'  o Median n added reads:         {median_n_reads_added:.2f} \n')
+    f.write(f'  * Median n degenerated GBCs:    {median_n_degenerated:.2f} \n')
+    f.write(f'  * Median n added reads:         {median_n_reads_added:.2f} \n')
     f.write(f'- Clonal inference:                    \n')
-    f.write(f'  o  w/i spikeins:                {n_unique_wi} unique clones, median prevalence {median_pr_wi:.2f}  \n')
-    f.write(f'  o  w/o spikeins:                {n_unique_wo} unique clones, median prevalence {median_pr_wo:.2f}  \n')
+    f.write(f'  *  w/i spikeins:                {n_unique_wi} unique clones, median prevalence {median_pr_wi:.2f}  \n')
+    f.write(f'  *  w/o spikeins:                {n_unique_wo} unique clones, median prevalence {median_pr_wo:.2f}  \n')
     f.write('\n')
 
     f.close()
