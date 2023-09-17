@@ -15,9 +15,7 @@ process collapse_output {
   script:
   """
   python3 \
-  ${baseDir}/bin/bulk/collapse_outputs.py \
-  -i ${params.bulk_outdir} \
-  -o ${params.bulk_outdir}/../
+  ${baseDir}/bin/bulk/collapse_outputs.py -i ${params.bulk_outdir}
   """
 
   stub:
