@@ -13,7 +13,7 @@ process collapse_output {
   val last
 
   output:
-  val path
+  path summary
 
   script:
   """
