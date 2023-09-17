@@ -7,10 +7,10 @@ nextflow.enable.dsl = 2
 process collapse_output {
 
   // Publish
-  publishDir "${params.bulk_outdir}/summary/", mode: 'copy'
+  publishDir "${params.bulk_outdir}", mode: 'copy'
 
   input:
-  tuple val(flags)
+  val last
 
   output:
   path summary
