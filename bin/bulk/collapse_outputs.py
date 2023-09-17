@@ -35,8 +35,8 @@ my_parser.add_argument(
 	'-o', 
 	'--output', 
 	type=str,
-	default=None,
-	help='The path to the output folder of choice. Default: None.'
+	default=os.getcwd(),
+	help='The path to the output folder of choice. Default: os.getcwd().'
 )
  
  

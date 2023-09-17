@@ -44,7 +44,9 @@ workflow bulk {
         INFER_PREVALENCES.out.df_spikeins,
         generate_run_summary_bulk.out.summary
       )
-      collapse_output(publish_bulk.out.finish_flag.collect().last())
+      collapse_output(
+        publish_bulk.out.finish_flag.collect().last() // Need to fire only at the end
+      )
 
   emit:
       flags = publish_bulk.out.finish_flag.collect()
