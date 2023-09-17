@@ -9,6 +9,7 @@ include { CORRECT_AND_COUNT } from "./modules/correct_GBC.nf"
 include { INFER_PREVALENCES } from "./modules/infer_clone_prevalences.nf"
 include { generate_run_summary_bulk } from "./modules/run_summary.nf"
 include { publish_bulk } from "./modules/publish.nf"
+include { collapse_output } from "./modules/collapse_out.nf"
 
  
 //
@@ -43,6 +44,7 @@ workflow bulk {
         INFER_PREVALENCES.out.df_spikeins,
         generate_run_summary_bulk.out.summary
       )
+      collapse_output()
 
   emit:
       read_counts = CORRECT_AND_COUNT.out.counts
