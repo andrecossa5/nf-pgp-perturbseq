@@ -169,7 +169,7 @@ def main():
     f.write('Overview: \n')
     f.write(f'- Date of analysis:               {datetime.datetime.now().strftime("%d-%m-%Y")} \n')
     f.write(f'- User:                           {getpass.getuser()} \n')
-    f.write(f'- Working directory:              {os.getcwd().split("/")[:-2]} \n')
+    f.write(f'- Working directory:              {"/".join(os.getcwd().split("/")[:-2])} \n')
     f.write('\n')
     f.write(f'Parameters \n')
     f.write(f'--indir:                          {indir} \n')
