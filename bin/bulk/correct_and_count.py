@@ -196,8 +196,11 @@ def main():
     is_18bp = GBCs.map(lambda x: len(x) == 18)
     GBCs = GBCs.loc[is_18bp].copy()
     GBC_counts = GBCs.value_counts().astype(np.int32)
+    oneread_counts = GBC_counts.loc[lambda x: x==1].sum()
+    GBC_counts = GBC_counts.loc[lambda x: x>1].copy()
     del GBCs    # Save memory
     logger.info(f'Read input reads and filter short ones: {t.stop()}')
+    logger.info(f'One-read sequences accounts for {(GBC_counts.sum()/oneread_counts)*100:.2f}% of total GBC-containing reads')
 
     # Generate GBC clusters, and reformat
     t.start()
