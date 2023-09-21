@@ -133,7 +133,10 @@ def main():
     # Calculate stats
 
     # Total reads
-    total_reads = pd.read_csv(path_reads, header=None).shape[0]
+    total_reads = 0
+    with gzip.open(path_reads, 'rt') as f:
+        for _ in f:
+            total_reads += 1
 
     # Others
     df_ = pd.read_csv(path_read_counts, index_col=0)
