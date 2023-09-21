@@ -172,7 +172,7 @@ def plot_n_clones(df_prevalences, wi_spikeins=True, ax=None):
 	bar(df_, 'n', ax=ax, s=.75, c='k')
 	t = "w/i" if wi_spikeins else "W/o"
 	format_ax(ax, title=f'{t} spikeins', xticks=df_.index, ylabel='n')
-	ax.spines[['left', 'top']].set_visible(False)
+	ax.spines[['right', 'top']].set_visible(False)
 
 	return ax
 
@@ -192,7 +192,7 @@ def plot_cumsum(df_prevalences, wi_spikeins=True, ax=None):
 		ax, title=f'Cumulative clone prevalences, {t} spikeins', 
 		xticks='', xlabel='Ranked clones', ylabel='Prevalence'
 	)
-	ax.spines[['left', 'top']].set_visible(False)
+	ax.spines[['right', 'top']].set_visible(False)
 
 	return ax
 
