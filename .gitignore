@@ -20,5 +20,6 @@ step_2/.singularity
 .nextflow*
 trace*
 work
+test_data
 
 ./step_*_out*
