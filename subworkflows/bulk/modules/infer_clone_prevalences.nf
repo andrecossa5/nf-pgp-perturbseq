@@ -26,8 +26,7 @@ process INFER_PREVALENCES {
   ${baseDir}/bin/bulk/infer_clone_prevalences.py \
   -i ${counts} \
   --path_spikeins_table ${params.spikeins_table} \
-  --n_reads ${params.n_reads} \
-  --with_degenerated
+  --n_reads ${params.n_reads}
   """
 
   stub:

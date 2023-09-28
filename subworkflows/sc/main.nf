@@ -15,7 +15,7 @@ include { CELL_ASSIGNMENT } from "./modules/cell_assignment.nf"
 include { generate_run_summary_sc } from "./modules/run_summary.nf"
 include { publish_sc } from "./modules/publish.nf"
 
-
+ 
 //
 
 
@@ -26,14 +26,14 @@ workflow sc {
         ch_gbc
 
     main:
-
+ 
         // Merge reads
         MERGE_TENX(ch_tenx)
         MERGE_GBC(ch_gbc)
 
         // STARSolo
         SOLO(MERGE_TENX.out.reads)
-
+ 
         // Assign cells to clones
         FASTA_FROM_REF(ch_tenx)
         BOWTIE_INDEX_REF(FASTA_FROM_REF.out.fasta)

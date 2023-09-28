@@ -13,8 +13,8 @@ process MERGE_TENX {
 
   output:
   tuple val(sample_name), path("R1_tenx.fastq.gz"), path("R2_tenx.fastq.gz"), emit: reads
-
-  script:
+ 
+  script: 
   """
   zcat ${in_folder}/*R1*.fastq.gz \
   | awk '{if(NR%4==1){print "@"(NR%1?c+1:++c)} else {print \$0}}' \
