@@ -196,7 +196,7 @@ def plot_distributions(df_counts, df_spike, n_reads=1, with_df=False):
     std_ = df["log10_read_count"].std()
     t = f'log10 read counts: {median_:.2f} (+-{std_:.2f})'
     axs[0].set(title=t)
-    axs[0].legend_ = None
+    axs[0].legend(labels=counts_txt.to_list(), title='status', frameon=False)
     axs[0].spines[['right', 'top']].set_visible(False)
     
     sns.kdeplot(data=df, x='obs_frequency', fill=True, hue='status', ax=axs[1])
@@ -205,8 +205,7 @@ def plot_distributions(df_counts, df_spike, n_reads=1, with_df=False):
     t = f'Observed frequency: {median_:.2f} (+-{std_:.2f})'
     axs[1].set(title=t)
     axs[1].spines[['right', 'top']].set_visible(False)
-    axs[1].legend(labels=counts_txt.to_list(), title='status')
-    axs[1].legend_.set_frame_on(False)
+    axs[1].legend_ = None
     
     fig.suptitle(f'Read counts and frequency distributions. All GBCs > {n_reads} read (n={df.shape[0]})')
     fig.tight_layout()
