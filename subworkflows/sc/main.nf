@@ -18,7 +18,6 @@ include { publish_sc } from "./modules/publish.nf"
  
 //
 
-
 workflow sc {
     
     take:
