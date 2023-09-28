@@ -1,13 +1,12 @@
 #!/usr/bin/python
 
-import os
 import sys
-import numpy as np
 import pandas as pd
 import dnaio 
 
 
 ##
+
 
 # Paths
 path_R1_in = sys.argv[1]

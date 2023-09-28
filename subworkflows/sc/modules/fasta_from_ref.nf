@@ -16,7 +16,8 @@ process FASTA_FROM_REF {
 
   script:
   """
-  python3 fasta_from_ref.py -i ${params.bulk_outdir}/${sample_name}
+  python3 ${baseDir}/bin/sc/fasta_from_ref.py \
+  ${params.bulk_outdir}/${sample_name}
   """
   
   stub:
