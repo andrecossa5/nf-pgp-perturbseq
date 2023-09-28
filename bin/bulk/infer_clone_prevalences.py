@@ -189,9 +189,8 @@ def plot_distributions(df_counts, df_spike, n_reads=1, with_df=False):
     fig, axs = plt.subplots(1,2,figsize=(9,5))
     
     s = df['status'].value_counts().reset_index()
-    print(s)
-    print('ooook')
-    counts_txt = s['index'].astype('str') + ': ' + s['status'].astype('str')
+    s.columns = ['status', 'counts']
+    counts_txt = s['status'].astype('str') + ': ' + s['counts'].astype('str')
     sns.kdeplot(data=df, x='log10_read_count', fill=True, hue='status', ax=axs[0])
     median_ = df["log10_read_count"].median()
     std_ = df["log10_read_count"].std()
