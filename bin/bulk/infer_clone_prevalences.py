@@ -58,16 +58,6 @@ my_parser.add_argument(
     help='Min n_reads to retain a GBC.'
 )
 
-# Include degenerated
-my_parser.add_argument(
-    '--with_degenerated', 
-    action='store_true',
-    help='''
-        Include degenerated barcodes that were whitelisted, but were at a Hamming 
-        distance > than the treshold chosen. Default: False.
-        '''
-)
-
 
 ##
 
@@ -167,16 +157,16 @@ def filter_spikeins_n_reads(df_counts, df_spike, n_reads=1):
     else:
         raise ValueError('n_reads must be an integer >=1')
     
-    df_counts['log10_read_count'] = np.log10(df_counts['read_count'])
-    df_counts['obs_frequency'] = df_counts['read_count'] / df_counts['read_count'].sum()
+    df['log10_read_count'] = np.log10(df['read_count'])
+    df['obs_frequency'] = df['read_count'] / df['read_count'].sum()
 
-    return df_counts
+    return df
 
 
 ##
 
 
-def plot_distributions(df_counts, df_spike, n_reads=1, with_df=False):
+def plot_distributions(df_counts, df_spike, n_reads=1):
     """
     Plot distribution of log10 read counts and observed frequencies of GBCs, 
     after spikeins removal. GBCs can be filtered further to have at least n_reads reads.
@@ -210,10 +200,7 @@ def plot_distributions(df_counts, df_spike, n_reads=1, with_df=False):
     fig.suptitle(f'Read counts and frequency distributions. All GBCs > {n_reads} read (n={df.shape[0]})')
     fig.tight_layout()
 
-    if with_df:
-        return fig, df
-    else:
-        return fig
+    return fig
     
 
 ##
@@ -281,7 +268,7 @@ def plot_prevalences(df):
     r = np.corrcoef(x, y)[0,1]
 
     fig, ax = plt.subplots(figsize=(5.5,5))
-    ax.plot(x.cumsum(), y.cumsum(), 'ko')
+    ax.plot(x, y, 'ko')
     ax.set(
         xlabel='Cellular prevalence w/o spikeins', 
         ylabel='Cellular prevalence w/i spikeins', 
@@ -313,10 +300,7 @@ def main():
     )
 
     # Filter GBCs according to their correction status
-    allowed_status = ['corrected', 'not_whitelisted']
-    if args.with_degenerated:
-        allowed_status.append('degenerated_not_to_remove')
-    df_counts = df_counts.loc[df_counts['status'].isin(allowed_status)]
+    df_counts = df_counts.query('status != "degenerated_to_remove"')
 
     # With spikeins
     if path_spikeins_table is not None:
