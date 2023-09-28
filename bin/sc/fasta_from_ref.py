@@ -20,7 +20,7 @@ GBCs = df.index.to_list()
 
 # Write as fasta
 with open('GBC_reference.fa', 'w') as f:
-    for i, x in GBCs:
+    for i, x in enumerate(GBCs):
         f.write(f'>seq{i}\n')
         f.write(f'{x}\n')
 
