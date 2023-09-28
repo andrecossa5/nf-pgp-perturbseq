@@ -153,25 +153,24 @@ def fit_trend(df):
 ##
 
 
-def filter_spikeins_n_reads(df, df_spike, n_reads=1):
+def filter_spikeins_n_reads(df_counts, df_spike, n_reads=1):
     """
     Filter all spikeins from GBC counts and retain GBCs with at least n_reads.
     Than, recalculate log10_read_count and obs_frequency.
     """
-    
-    is_not_spike = ~df.index.isin(df_spike.index)
-    df = df.loc[is_not_spike].copy()
+    is_not_spike = ~df_counts.index.isin(df_spike.index)
+    df = df_counts.loc[is_not_spike].copy()
 
     if n_reads is not None:
-        has_enough_reads = df['read_count']>=n_reads
-        df = df[has_enough_reads].copy()
+        has_enough_reads = df_counts['read_count']>=n_reads
+        df = df_counts[has_enough_reads].copy()
     else:
         raise ValueError('n_reads must be an integer >=1')
     
-    df['log10_read_count'] = np.log10(df['read_count'])
-    df['obs_frequency'] = df['read_count'] / df['read_count'].sum()
+    df_counts['log10_read_count'] = np.log10(df_counts['read_count'])
+    df_counts['obs_frequency'] = df_counts['read_count'] / df_counts['read_count'].sum()
 
-    return df
+    return df_counts
 
 
 ##
@@ -190,6 +189,8 @@ def plot_distributions(df_counts, df_spike, n_reads=1, with_df=False):
     fig, axs = plt.subplots(1,2,figsize=(9,5))
     
     s = df['status'].value_counts().reset_index()
+    print(s)
+    print('ooook')
     counts_txt = s['index'].astype('str') + ': ' + s['status'].astype('str')
     sns.kdeplot(data=df, x='log10_read_count', fill=True, hue='status', ax=axs[0])
     median_ = df["log10_read_count"].median()
