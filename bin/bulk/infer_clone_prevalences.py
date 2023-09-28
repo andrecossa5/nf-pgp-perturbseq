@@ -50,14 +50,6 @@ my_parser.add_argument(
     '''
 )
 
-# Cumsum
-my_parser.add_argument( 
-    '--cumsum', 
-    type=int,
-    default=75,
-    help='Treshold to retain only barcodes accounting up to the <cumsum> percentile of the total GBC read_count.'
-)
-
 # Path spikeins table
 my_parser.add_argument( 
     '--n_reads', 
@@ -85,14 +77,12 @@ args = my_parser.parse_args()
 path_i = args.input
 path_o = args.output
 path_spikeins_table = args.path_spikeins_table
-cumsum = args.cumsum
 n_reads = args.n_reads
 
-# path_i = '/Users/IEO5505/Desktop/prova/prova/Li1/GBC_counts.csv'
-# path_o = os.getcwd()
-# path_spikeins_table = '/Users/IEO5505/Desktop/prova/prova/Li1/spikeins_table.csv' 
-# cumsum = 75
-# n_reads = 100
+# path_i = '/Users/IEO5505/Desktop/nf-pgp-perturbseq/test_data/GBC_counts.csv'
+# path_o = '/Users/IEO5505/Desktop/nf-pgp-perturbseq/test_data'
+# path_spikeins_table = '/Users/IEO5505/Desktop/nf-pgp-perturbseq/test_data/spikeins_table.csv' 
+# n_reads = 1000
 
 
 ########################################################################
@@ -101,8 +91,9 @@ n_reads = args.n_reads
 # Import code
 import numpy as np
 import pandas as pd
-from scipy.interpolate import interp1d 
 import seaborn as sns
+from scipy.interpolate import interp1d
+from sklearn.mixture import GaussianMixture
 import matplotlib.pyplot as plt
 
 
@@ -120,19 +111,33 @@ def rev_complement(x):
         rev_x.append(d[x[i]])
     return ''.join(rev_x)[::-1]
 
+
+##
+
+
+def calc_FC(s):
+     
+    FC = []
+    for i in range(s.size-1):
+        fc = s[i] / s[i+1]
+        FC.append(fc)
+    FC.append(1)
+
+    return np.array(FC)
+
+
 ##
 
 
 def fit_trend(df):
     """
-    Plot the Log f, cell
+    Interpolation read_count, n_cells (log scale) and visualization.
     """
-
     x = df['log10_read_count']
     y = df['log10_n_cells']
-    f = interp1d(x, y)
     r_counts_cells = np.corrcoef(x, y)[0,1]
-    r_FCs = np.corrcoef(df['FC_from_reads'], df['FC_from_n_cells'])[0,1]
+    r_FCs = np.corrcoef(df['FC_from_read_count'], df['FC_from_n_cells'])[0,1]
+    f = interp1d(x, y, assume_sorted=False, fill_value='extrapolate')
 
     fig, ax = plt.subplots(figsize=(5.5,5))
     ax.plot(x, y, 'ko')
@@ -148,36 +153,116 @@ def fit_trend(df):
 ##
 
 
-def filter_GBCs(df_counts, df_spike=None, f=None, path_o=None, use_spike=True, cumsum=75, n_reads=1000):
+def filter_spikeins_n_reads(df, df_spike, n_reads=1):
+    """
+    Filter all spikeins from GBC counts and retain GBCs with at least n_reads.
+    Than, recalculate log10_read_count and obs_frequency.
+    """
+    
+    is_not_spike = ~df.index.isin(df_spike.index)
+    df = df.loc[is_not_spike].copy()
+
+    if n_reads is not None:
+        has_enough_reads = df['read_count']>=n_reads
+        df = df[has_enough_reads].copy()
+    else:
+        raise ValueError('n_reads must be an integer >=1')
+    
+    df['log10_read_count'] = np.log10(df['read_count'])
+    df['obs_frequency'] = df['read_count'] / df['read_count'].sum()
+
+    return df
+
+
+##
+
+
+def plot_distributions(df_counts, df_spike, n_reads=1, with_df=False):
+    """
+    Plot distribution of log10 read counts and observed frequencies of GBCs, 
+    after spikeins removal. GBCs can be filtered further to have at least n_reads reads.
+    """
+
+    # Filter all GBCs counts
+    df = filter_spikeins_n_reads(df_counts, df_spike, n_reads=n_reads)
+
+    # Read counts / GBC frequency distributions
+    fig, axs = plt.subplots(1,2,figsize=(9,5))
+    
+    s =  df['status'].value_counts().reset_index()
+    counts_txt = s['index'].astype('str') + ': ' + s['status'].astype('str')
+    sns.kdeplot(data=df, x='log10_read_count', fill=True, hue='status', ax=axs[0])
+    median_ = df["log10_read_count"].median()
+    std_ = df["log10_read_count"].std()
+    t = f'log10 read counts: {median_:.2f} (+-{std_:.2f})'
+    axs[0].set(title=t)
+    axs[0].legend_ = None
+    axs[0].spines[['right', 'top']].set_visible(False)
+    
+    sns.kdeplot(data=df, x='obs_frequency', fill=True, hue='status', ax=axs[1])
+    median_ = df["obs_frequency"].median()
+    std_ = df["obs_frequency"].std()
+    t = f'Observed frequency: {median_:.2f} (+-{std_:.2f})'
+    axs[1].set(title=t)
+    axs[1].spines[['right', 'top']].set_visible(False)
+    axs[1].legend(labels=counts_txt.to_list(), title='status')
+    axs[1].legend_.set_frame_on(False)
+    
+    fig.suptitle(f'Read counts and frequency distributions. All GBCs > {n_reads} read (n={df.shape[0]})')
+    fig.tight_layout()
+
+    if with_df:
+        return fig, df
+    else:
+        return fig
+    
+
+##
+
+
+def filter_GBCs(df_counts, df_spike=None, n_reads=1, f=None, use_spike=True):
     """
     Function to filter a read count table with and without spikeins info.
     """
         
     # Calculate log10 read_counts
-    df = df_counts.copy()
     
     # W/i
     if use_spike:
 
-        # Remove GBCs falling outside the interpolation range
-        min_ = df_spike['log10_read_count'].min()
-        max_ = df_spike['log10_read_count'].max()
-        df = df.query('log10_read_count >= @min_ and log10_read_count <= @max_')
+        # Filter to a minimum amount of reads
+        df = filter_spikeins_n_reads(df_counts, df_spike, n_reads=n_reads)
 
-        # Fit trend
+        # Use interpolation to infer cellular_prevalence
         df['log10_n_cells'] = df['log10_read_count'].map(lambda x: f(x))
         df['n_cells'] = np.round(10 ** df['log10_n_cells'])
         df['cellular_prevalence'] = df['n_cells'] / df['n_cells'].sum()
-        df = df.loc[:, ~df.columns.str.contains('log_10|cells')]
+
+        print(df.head())
+        pho = np.corrcoef(df["obs_frequency"], df["cellular_prevalence"])[0,1]
+        print(f'Pearson\'s r: {pho}')
+
+        df = df.loc[:, ~df.columns.str.contains('log10|cells|obs')].copy()
 
     else:
         
-        read_count_cumsum = df['read_count'].cumsum()
-        t = np.percentile(read_count_cumsum, cumsum)
-        gbc_to_retain = read_count_cumsum.loc[lambda x: x<=t].index
-        df = df.loc[gbc_to_retain].query('read_count>@n_reads')                             # Filter
-        df['cellular_prevalence'] = df['log10_read_count'] / df['log10_read_count'].sum()
-        df = df.loc[:, ~df.columns.str.contains('log_10|cells')]
+        # Filter out only spikeins
+        df = filter_spikeins_n_reads(df_counts, df_spike, n_reads=n_reads/10)
+
+        # Use a GMM to assign GBCs to 2 mixture components and retain the ones from the top one
+        X = df['read_count'].values.reshape(-1,1)
+        gmm = GaussianMixture(n_components=2, random_state=1234)  
+        gmm.fit(X)
+        top_component_idx = np.argsort(gmm.means_.flatten())[-1]
+        test = gmm.predict_proba(X)[:,top_component_idx]>.85    # Retain only GBCs assigned to the top component
+        df = df.loc[test]                                       # Filter
+        df['cellular_prevalence'] = df['read_count'] / df['read_count'].sum()
+
+        print(df.head())
+        pho = np.corrcoef(df["obs_frequency"], df["cellular_prevalence"])[0,1]
+        print(f'Pearson\'s r: {pho}')
+
+        df = df.loc[:, ~df.columns.str.contains('log_10|cells|obs')].copy()
 
     return df
 
@@ -197,11 +282,15 @@ def plot_prevalences(df):
     r = np.corrcoef(x, y)[0,1]
 
     fig, ax = plt.subplots(figsize=(5.5,5))
-    ax.plot(x.cumsum(), 'b.-', label='w/o')
-    ax.plot(y.cumsum(), 'r.-', label='w/i')
-    ax.legend(loc='upper left', bbox_to_anchor=(1,1), frameon=False, title='Method')
-    title = f'Prevalences w/i and w/o spikeins (r={r:.2f})'
-    ax.set(xlabel='Ranked GBC', ylabel='Prevance', title=title)
+    ax.plot(x.cumsum(), y.cumsum(), 'ko')
+    ax.set(
+        xlabel='Cellular prevalence w/o spikeins', 
+        ylabel='Cellular prevalence w/i spikeins', 
+        title=f'Cellular prevalences (w/i, w/o spikeins, r={r:.2f})'
+    )
+    ax.text(.1, .9, f'n clones w/i: {df["found_wi"].sum()}', transform=ax.transAxes)
+    ax.text(.1, .85, f'n clones w/o: {df["found_wo"].sum()}', transform=ax.transAxes)
+    ax.text(.1, .8, f'n common: {df_common.shape[0]}', transform=ax.transAxes)
     ax.spines[['right', 'top']].set_visible(False)
     fig.tight_layout()
     
@@ -216,10 +305,15 @@ def plot_prevalences(df):
 
 def main():
 
-    # Read counts
+    # GBCs counts
     df_counts = pd.read_csv(path_i, index_col=0)
+    df_counts['status'] = pd.Categorical(
+        df_counts['status'], 
+        categories=['corrected', 'not_whitelisted', 
+                    'degenerated_not_to_remove', 'degenerated_to_remove']
+    )
 
-    # Filter GBCs
+    # Filter GBCs according to their correction status
     allowed_status = ['corrected', 'not_whitelisted']
     if args.with_degenerated:
         allowed_status.append('degenerated_not_to_remove')
@@ -227,58 +321,67 @@ def main():
 
     # With spikeins
     if path_spikeins_table is not None:
-
         if os.path.exists(path_spikeins_table):
             print(f'Spikeins detected... Use this info for clonal inference.')
         else:
             raise ValueError(f'Provided path {path_spikeins_table} does not exists!')
 
-    # At least two GBCs are needed to make the interpolation. Better all of them though...
+    # Read spikeins table and check the detection of the 'centrl ones'
     df_spike = pd.read_csv(path_spikeins_table, index_col=0)
-    df_spike.index = df_spike.index.map(lambda x: rev_complement(x))
-    assert np.sum(df_spike.index.isin(df_counts.index)) >= 2
+    df_spike.index = df_spike.index.map(lambda x: rev_complement(x))             
+    # 2 orders dynamic range only, 3 points. 2 needed, bare minimum
+    central_spikeins = df_spike.query('n_cells>=1000 and n_cells <=100000').index
+    assert np.sum(df_counts.index.isin(central_spikeins)) >= 2
 
     # Fit spikeins trend
-    spikeins = df_spike.index[df_spike.index.isin(df_counts.index)]
-    df_spike = df_spike.loc[spikeins,:].join(df_counts.loc[spikeins,:])
+    df_spike = df_spike.join(df_counts)
     df_spike['log10_n_cells'] = np.log10(df_spike['n_cells'])
     df_spike['log10_read_count'] = np.log10(df_spike['read_count'])
-    df_spike['FC_from_reads'] = df_spike['read_count'] / df_spike['read_count'].min()
-    df_spike['FC_from_n_cells'] = df_spike['n_cells'] / df_spike['n_cells'].min()  # Normalize to min values
-    f, fig = fit_trend(df_spike)
+    df_spike['FC_from_n_cells'] = calc_FC(df_spike['log10_n_cells'])
+    df_spike['FC_from_read_count'] = calc_FC(df_spike['log10_read_count'])
+    f, fig = fit_trend(df_spike.loc[central_spikeins])  # Trend only to central spikeins
 
-    # Save 
-    df_spike.to_csv(os.path.join(path_o, 'df_spikeins.csv'))
+    # Save spikeins table and fit
+    (
+        df_spike
+        .assign(used_for_fit=lambda x: x.index.isin(central_spikeins))
+        .to_csv(os.path.join(path_o, 'df_spikeins.csv'))
+    )
     fig.savefig(os.path.join(path_o, 'spikeins_fit.png'), dpi=300)
 
     ##
 
-    # Filter spikeins and plot distributions
-    is_spike = df_counts.index.isin(df_spike.index)
-    df_counts = df_counts[~is_spike].copy()
-    df_counts['log10_read_count'] = np.log10(df_counts['read_count'])
+    # Plot GBCs distributions, after spikeins (all of them) removal, and retaining GBCs with>n_reads
+    fig = plot_distributions(df_counts, df_spike)
+    fig.savefig(os.path.join(path_o, 'GBC_1read_distributions.png'), dpi=300)
+    fig = plot_distributions(df_counts, df_spike, n_reads=n_reads)
+    fig.savefig(os.path.join(path_o, f'GBC_morereads_distributions.png'), dpi=300)
 
     # W/i
-    df_with = filter_GBCs(df_counts, df_spike=df_spike, f=f, path_o=path_o, use_spike=True)
+    df_with = filter_GBCs(df_counts, df_spike=df_spike, n_reads=n_reads, f=f, use_spike=True)
 
     # W/o
-    df_without = filter_GBCs(df_counts, path_o=path_o, use_spike=False, cumsum=cumsum, n_reads=n_reads)
+    df_without = filter_GBCs(df_counts, df_spike=df_spike, n_reads=n_reads, use_spike=False)
 
     # Merge info
     df = (
-        df_without
-        .join(df_with.loc[:,['cellular_prevalence']], lsuffix='_wo', rsuffix='_wi', how='outer')
-        .assign(
-            found_wi=lambda x: ~x['cellular_prevalence_wi'].isna(),
-            found_wo=lambda x: ~x['cellular_prevalence_wo'].isna()
+        df_counts[['read_count', 'status']]
+        .join(
+            df_without[['cellular_prevalence']]
+            .join(df_with[['cellular_prevalence']], lsuffix='_wo', rsuffix='_wi', how='outer')
+            .assign(
+                found_wi=lambda x: ~x['cellular_prevalence_wi'].isna(),
+                found_wo=lambda x: ~x['cellular_prevalence_wo'].isna()
+            ),
+            how='right'
         )
-        .sort_values('log10_read_count', ascending=False)
+        .sort_values('read_count', ascending=False)
     )
     df.to_csv(os.path.join(path_o, 'clonal_prevalences.csv'))
 
     # Last vizualization
     fig = plot_prevalences(df)
-    fig.savefig(os.path.join(path_o, 'prevalences.png'), dpi=300)
+    fig.savefig(os.path.join(path_o, 'final_prevalences.png'), dpi=300)
 
 ##
 
@@ -288,8 +391,5 @@ def main():
 # Run
 if __name__ == '__main__':
     main()
-
-
-d = { 'a' : 'b' }
 
 

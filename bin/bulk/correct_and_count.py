@@ -198,7 +198,7 @@ def main():
     GBC_counts = GBCs.value_counts().astype(np.int32)
     oneread_counts = GBC_counts.loc[lambda x: x==1].sum()
     GBC_counts = GBC_counts.loc[lambda x: x>1].copy()
-    perc_reads = (oneread_counts * 100) / GBC_counts.sum()
+    perc_reads = (oneread_counts*100) / GBC_counts.sum()
     del GBCs    # Save memory
     logger.info(f'Read input reads and filter short ones: {t.stop()}')
     logger.info(f'One-read sequences accounts for {perc_reads:.2f}% of total GBC-containing reads')
