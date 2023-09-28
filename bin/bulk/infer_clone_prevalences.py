@@ -185,6 +185,8 @@ def plot_distributions(df_counts, df_spike, n_reads=1, with_df=False):
     # Filter all GBCs counts
     df = filter_spikeins_n_reads(df_counts, df_spike, n_reads=n_reads)
 
+    df.to_csv('prova.csv')
+
     # Read counts / GBC frequency distributions
     fig, axs = plt.subplots(1,2,figsize=(9,5))
     
