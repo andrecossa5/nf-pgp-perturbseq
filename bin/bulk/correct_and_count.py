@@ -62,8 +62,8 @@ my_parser.add_argument(
 my_parser.add_argument(
     '--min_n_reads',
     type=int,
-    default=100,
-    help='min_n_reads that a GBCs must have to be considered in the final counts. Default: 100.'
+    default=1,
+    help='min_n_reads that a "correct" GBCs must have to be considered for error correction. Default: 100.'
 )
 
 
@@ -77,6 +77,12 @@ path_o = args.output
 method = args.method
 threshold = args.threshold
 min_n_reads = args.min_n_reads
+
+# path_i = '/Users/IEO5505/Desktop/nf-pgp-perturbseq/test_data/GBC_not_corrected.tsv.gz'
+# path_o = '/Users/IEO5505/Desktop/nf-pgp-perturbseq/test_data'
+# method = 'directional'
+# threshold = 3
+# min_n_reads = 100
 
 
 ##
@@ -236,7 +242,7 @@ def main():
     df['n_reads_correct'] = GBC_counts.loc[df['correct']].values
     df['n_reads_degenerated'] = GBC_counts.loc[df['degenerated']].values
 
-    # Filter out correct-degenerated pairs with too low or too similar read_counts:
+    # Filter out correct-degenerated ambigous pairs with too low or too similar read_counts:
     # This will not be considered for correction.
     df = df.query('n_reads_correct>=@min_n_reads and n_reads_correct>=@min_n_reads*n_reads_degenerated')
 
