@@ -7,7 +7,7 @@ include { onerun } from "./subworkflows/onerun/main"
 
 //
 
-// Input bulk_fastqs
+// Input bulk
 ch_input_bulk = Channel
     .fromPath("${params.bulk_indir}/*", type:'dir') 
     .map{ tuple(it.getName(), it) }
