@@ -1,4 +1,4 @@
-// nf-perturbseq-pipeline
+// nf-perturbseq
 
 nextflow.enable.dsl = 2
 include { bulk } from "./subworkflows/bulk/main"
