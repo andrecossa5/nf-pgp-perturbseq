@@ -1,10 +1,10 @@
 {
 
-    "bulk_indir" : "/Users/IEO5505/Desktop/example_perturb/pp/data/perturb_bulk",
-    "bulk_outdir" : "/Users/IEO5505/Desktop/example_perturb/pp/results/perturb_bulk",
+    "bulk_indir" : "/Users/IEO5505/Desktop/example_perturb/step_1_input",
+    "bulk_outdir" : "/Users/IEO5505/Desktop/example_perturb/perturb_bulk",
     "bulk_sc_map" : "/Users/IEO5505/Desktop/example_perturb/meta/bulk_sc_map.csv",
     "hamming_distance_treshold" : 3,
-    "min_n_reads_treshold" : 100,
+    "n_reads" : 1000,
     
     "sc_pattern" : "TAGCAAACTGGGGCACAAGCTTAATTAAGAATT",
     "anchor_sequence" : "GGGTTTAAACGGGCCCTCTAG",

@@ -142,11 +142,19 @@ def main():
     df_ = pd.read_csv(path_read_counts, index_col=0)
     total_GBC_reads = df_['read_count'].sum()
     n_unique_GBCs = df_.shape[0]
+
     status_counts = df_['status'].value_counts()
-    n_corrected = status_counts['corrected']
-    n_not_whitelisted = status_counts['not_whitelisted']
-    n_degenerated_removed = status_counts['degenerated_to_remove']
-    n_degenerated_not_removed = status_counts['degenerated_not_to_remove']
+    try:
+        n_corrected = status_counts['corrected']
+        n_not_whitelisted = status_counts['not_whitelisted']
+        n_degenerated_removed = status_counts['degenerated_to_remove']
+        n_degenerated_not_removed = status_counts['degenerated_not_to_remove']
+    except:
+        n_corrected = 0
+        n_not_whitelisted = 0
+        n_degenerated_removed = 0
+        n_degenerated_not_removed = 0
+        print('Some problem occurred...')
     
     df_ = pd.read_csv(path_correction_df, index_col=0)   
     median_n_degenerated = df_['n_degenerated'].median()

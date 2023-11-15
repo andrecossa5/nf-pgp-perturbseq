@@ -16,14 +16,17 @@ process INFER_PREVALENCES {
   tuple val(sample_name), path('df_spikeins.csv'), emit: df_spikeins
   tuple val(sample_name), path('spikeins_fit.png'), emit: spikeins_plot
   tuple val(sample_name), path('clonal_prevalences.csv'), emit: stats_table
-  tuple val(sample_name), path('prevalences.png'), emit: prevalences_plot
+  tuple val(sample_name), path('final_prevalences.png'), emit: prevalences_plot
+  tuple val(sample_name), path('GBC_1read_distributions.png'), emit: distributions_1read
+  tuple val(sample_name), path("GBC_morereads_distributions.png"), emit: distributions_morereads
 
   script:
   """
   python3 \
   ${baseDir}/bin/bulk/infer_clone_prevalences.py \
   -i ${counts} \
-  --path_spikeins_table ${params.spikeins_table}
+  --path_spikeins_table ${params.spikeins_table} \
+  --n_reads ${params.n_reads}
   """
 
   stub:
@@ -32,7 +35,9 @@ process INFER_PREVALENCES {
   touch clonal_prevalences.csv
   touch df_spikeins.csv
   touch spikeins_fit.png
-  touch prevalences.png
+  touch final_prevalences.png
+  touch GBC_1read_distributions.png
+  touch GBC_morereads_distributions.png
   """
 
 }

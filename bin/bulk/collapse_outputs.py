@@ -264,12 +264,18 @@ def main():
 			if x == 'spikeins_fit.png':
 				shutil.copy(os.path.join(path_, x), 
 					os.path.join(path_output, 'summary', 'spikeins', f'{name}.png'))
-			elif x == 'prevalences.png':
+			elif x == 'final_prevalences.png':
 				shutil.copy(os.path.join(path_, x), 
 					os.path.join(path_output, 'summary', 'prevalences', f'{name}.png'))
 			elif x == 'df_spikeins.csv':
 				shutil.copy(os.path.join(path_, x),
 					os.path.join(path_output, 'summary', 'spikeins', f'{name}.csv'))
+			elif x == 'GBC_1read_distributions.png':
+				shutil.copy(os.path.join(path_, x),
+					os.path.join(path_output, 'summary', 'prevalences', f'GBC_1read_distributions_{name}.png'))
+			elif x == 'GBC_morereads_distributions.png':
+				shutil.copy(os.path.join(path_, x),
+					os.path.join(path_output, 'summary', 'prevalences', f'GBC_morereads_distributions_{name}.png'))
 
 	# Prevalences df	
 	df_prevalences = concat_df(path_input, folder_d, 'clonal_prevalences')

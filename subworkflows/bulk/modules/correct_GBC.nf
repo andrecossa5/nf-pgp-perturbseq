@@ -24,8 +24,7 @@ process CORRECT_AND_COUNT {
   ${baseDir}/bin/bulk/correct_and_count.py \
   -i ${raw_counts} \
   -t ${params.hamming_distance_treshold} \
-  --method directional \
-  --min_n_reads ${params.min_n_reads_treshold}
+  --method directional
   """
 
   stub:

@@ -42,6 +42,8 @@ workflow bulk {
         INFER_PREVALENCES.out.prevalences_plot,
         INFER_PREVALENCES.out.spikeins_plot,
         INFER_PREVALENCES.out.df_spikeins,
+        INFER_PREVALENCES.out.distributions_1read,
+        INFER_PREVALENCES.out.distributions_morereads,
         generate_run_summary_bulk.out.summary
       )
       collapse_output(

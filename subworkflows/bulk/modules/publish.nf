@@ -19,6 +19,8 @@ process publish_bulk {
   tuple val(sample_name), path(prevalences_plot)
   tuple val(sample_name), path(spikeins_plot)
   tuple val(sample_name), path(df_spikeins)
+  tuple val(sample_name), path(distributions_1read)
+  tuple val(sample_name), path(distributions_morereads)
   tuple val(sample_name), path(run_summary)
 
   output:
@@ -29,6 +31,8 @@ process publish_bulk {
   path prevalences_plot
   path spikeins_plot
   path df_spikeins
+  path distributions_1read
+  path distributions_morereads
   path run_summary
   val sample_name, emit: finish_flag
 
