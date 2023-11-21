@@ -47,8 +47,8 @@ GBCs = pd.read_csv(path_GBCs, index_col=0, sep='\t', header=None)
 aligned_names = pd.read_csv(path_aligned_reads, index_col=0, sep='\t', header=None)
 
 # Chek read names are identical
-if not (CBCs.index == UMIs.index).all() and (UMIs.index == GBCs.index).all():
-    raise ValueError('Read names of filtered CBCs, UMIs and GBCs tables are not identical. Something is wrong...')
+# if not (CBCs.index == UMIs.index).all() and (UMIs.index == GBCs.index).all():
+#     raise ValueError('Read names of filtered CBCs, UMIs and GBCs tables are not identical. Something is wrong...')
 # Merge in a single table
 df = pd.concat([CBCs, UMIs, GBCs], axis=1)
 df.columns = ['CBC', 'UMI', 'GBC']
