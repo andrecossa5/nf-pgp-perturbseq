@@ -4,7 +4,7 @@ import sys
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-
+import dask.dataframe as dd
 
 ##
 
@@ -35,34 +35,32 @@ def cell_assignment(df, t):
 
 
 # Paths
-path_CBCs = sys.argv[1]
-path_UMIs = sys.argv[2]
-path_GBCs = sys.argv[3]
+path_elements = sys.argv[1]
 path_aligned_reads = sys.argv[4]
 
-# Read components and aligned reads
-CBCs = pd.read_csv(path_CBCs, index_col=0, sep='\t', header=None)
-UMIs = pd.read_csv(path_UMIs, index_col=0, sep='\t', header=None)
-GBCs = pd.read_csv(path_GBCs, index_col=0, sep='\t', header=None)
-aligned_names = pd.read_csv(path_aligned_reads, index_col=0, sep='\t', header=None)
-
-# Chek read names are identical
-# if not (CBCs.index == UMIs.index).all() and (UMIs.index == GBCs.index).all():
-#     raise ValueError('Read names of filtered CBCs, UMIs and GBCs tables are not identical. Something is wrong...')
-# Merge in a single table
-df = pd.concat([CBCs, UMIs, GBCs], axis=1)
-df.columns = ['CBC', 'UMI', 'GBC']
+# Read GBC-containing reads components, and reads aligned to the bulk reference
+df = dd.read_csv(path_elements, sep='\t', header=None, dtype='string')
+df.columns = ['read_name', 'CBC', 'GBC', 'UMI']
+aligned_names = pd.read_csv(path_aligned_reads, sep='\t', header=None, dtype='string')[0]
 
 # Filter for only reads aligned to the bulk reference, write all CBC-UMI-GBC table
-df = df.loc[aligned_names.index,:]
-df.to_csv('CBC_UMI_GBC_by_read.tsv.gz', sep='\t')
+df = df.loc[df['read_name'].isin(aligned_names),:]
+df.compute().to_csv('CBC_UMI_GBC_by_read.tsv.gz', sep='\t', index=False)
 
-# Compute unique CBC-GBC combo table
-df_read_counts = df.groupby(['CBC', 'GBC']).size().to_frame('read_counts')
-df_umi_counts = df.reset_index().loc[:, ['CBC', 'GBC', 'UMI']].drop_duplicates().groupby(['CBC', 'GBC']).size().to_frame('umi_counts')
-df_combos = df_read_counts.join(df_umi_counts).reset_index()
+# Compute combos table
+df_combos = (
+    df.groupby(['CBC', 'GBC']).size().compute().to_frame('read_counts')
+    .join(
+        df.groupby(['CBC', 'GBC', 'UMI']).size().compute().to_frame('umi_counts')
+    )
+    .reset_index()
+)
 df_combos['coverage'] = df_combos['read_counts'] / df_combos['umi_counts']
 df_combos.to_csv('CBC_GBC_combos.tsv.gz', sep='\t')
+
+
+##
+
 
 # Cell classification: from Adamson et al. 2016
 L = []
@@ -100,3 +98,6 @@ df_clones = df_cells.reset_index().groupby('GBC').size().to_frame('n_cells')
 df_clones['prevalence'] = df_clones['n_cells'] / df_clones['n_cells'].sum()
 df_clones = df_clones.sort_values('prevalence', ascending=False)
 df_clones.to_csv('clones_summary_table.csv')
+
+
+##
