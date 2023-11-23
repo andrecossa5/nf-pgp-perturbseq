@@ -78,12 +78,6 @@ method = args.method
 threshold = args.threshold
 min_n_reads = args.min_n_reads
 
-# path_i = '/Users/IEO5505/Desktop/nf-pgp-perturbseq/test_data/GBC_not_corrected.tsv.gz'
-# path_o = '/Users/IEO5505/Desktop/nf-pgp-perturbseq/test_data'
-# method = 'directional'
-# threshold = 3
-# min_n_reads = 100
-
 
 ##
 
@@ -200,7 +194,7 @@ def main():
     t.start()
     GBCs = pd.read_csv(path_i, header=None)[0]
     is_18bp = GBCs.map(lambda x: len(x) == 18)
-    GBCs = GBCs.loc[is_18bp].copy()
+    GBCs = GBCs.loc[is_18bp]
     GBC_counts = GBCs.value_counts().astype(np.int32)
     oneread_counts = GBC_counts.loc[lambda x: x==1].sum()
     GBC_counts = GBC_counts.loc[lambda x: x>1].copy()
