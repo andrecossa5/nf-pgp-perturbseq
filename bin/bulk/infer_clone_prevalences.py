@@ -69,10 +69,8 @@ path_o = args.output
 path_spikeins_table = args.path_spikeins_table
 n_reads = args.n_reads
 
-# path_i = '/Users/IEO5505/Desktop/nf-pgp-perturbseq/test_data/GBC_counts.csv'
-# path_o = '/Users/IEO5505/Desktop/nf-pgp-perturbseq/test_data'
-# path_spikeins_table = '/Users/IEO5505/Desktop/nf-pgp-perturbseq/test_data/spikeins_table.csv' 
-# n_reads = 1000
+
+##
 
 
 ########################################################################
@@ -82,6 +80,7 @@ n_reads = args.n_reads
 import numpy as np
 import pandas as pd
 import seaborn as sns
+import dask.dataframe as dd
 from scipy.interpolate import interp1d
 from sklearn.mixture import GaussianMixture
 import matplotlib.pyplot as plt
@@ -292,15 +291,16 @@ def plot_prevalences(df):
 def main():
 
     # GBCs counts
-    df_counts = pd.read_csv(path_i, index_col=0)
-    df_counts['status'] = pd.Categorical(
-        df_counts['status'], 
-        categories=['corrected', 'not_whitelisted', 
-                    'degenerated_not_to_remove', 'degenerated_to_remove']
-    )
+    df_counts = dd.read_csv(path_i)
+    df_counts.columns = ['GBC', 'read_count', 'status']
 
     # Filter GBCs according to their correction status
-    df_counts = df_counts.query('status != "degenerated_to_remove"')
+    df_counts = df_counts.query('status != "degenerated_to_remove"').compute()
+    df_counts = df_counts.set_index('GBC')
+    df_counts['status'] = pd.Categorical(
+        df_counts['status'], 
+        categories=['corrected', 'not_whitelisted', 'degenerated_not_to_remove']
+    )
 
     # With spikeins
     if path_spikeins_table is not None:

@@ -9,16 +9,17 @@ process GBC_TO_FASTA {
   tag "${sample_name}"
 
   input:
-  tuple val(sample_name), path(GBCs)
+  tuple val(sample_name), path(elements)
 
   output:
   tuple val(sample_name), path("GBC_to_align.fa.gz"), emit: fasta
 
   script:
   """
-  awk '{ gsub("@",">",\$1); print }' ${GBCs} \
-  | tr ' ' '\n' \
-  | pigz --fast -p ${task.cpus} \
+  cut -f 1,2 ${elements} | \
+  awk '{ gsub("@", ">", \$1); print }' | \
+  tr ' ' '\n' | \
+  pigz --fast -p ${task.cpus} \
   > GBC_to_align.fa.gz
   """
 

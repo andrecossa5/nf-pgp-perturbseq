@@ -10,7 +10,6 @@ process generate_run_summary_bulk {
   tag "${sample_name}"
 
   input:
-  tuple val(sample_name), path(reads)
   tuple val(sample_name), path(read_counts)
   tuple val(sample_name), path(correction_df)
   tuple val(sample_name), path(stats_table)
@@ -20,9 +19,8 @@ process generate_run_summary_bulk {
 
   script:
   """
-  python3 \
+  python \
   ${baseDir}/bin/bulk/create_run_summary.py \
-  --reads ${reads} \
   --indir ${params.bulk_indir} \
   --outdir ${params.bulk_outdir} \
   --anchor_sequence ${params.anchor_sequence} \
@@ -34,7 +32,6 @@ process generate_run_summary_bulk {
 
   stub:
   """
-  echo ${sample_name} > sample
   touch run_summary.txt
   """
 

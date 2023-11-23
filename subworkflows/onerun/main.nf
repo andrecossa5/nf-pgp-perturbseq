@@ -5,9 +5,8 @@ nextflow.enable.dsl = 2
 
 // BULK
 include { SEARCH_PATTERNS } from "../bulk/modules/generate_search_patterns.nf"
-include { EXTRACT_READS } from "../bulk/modules/extract_reads.nf"
-include { FIND_GBC } from "../bulk/modules/find_GBC.nf"
-include { CORRECT_AND_COUNT } from "../bulk/modules/correct_GBC.nf"
+include { EXTRACT_GBC } from "../bulk/modules/extract_GBC.nf"
+include { CORRECT_AND_COUNT } from "../bulk/modules/correct_and_count.nf"
 include { INFER_PREVALENCES } from "../bulk/modules/infer_clone_prevalences.nf"
 include { generate_run_summary_bulk } from "../bulk/modules/run_summary.nf"
 include { publish_bulk } from "../bulk/modules/publish.nf"
@@ -47,9 +46,8 @@ workflow onerun {
 
         // BULK
         SEARCH_PATTERNS()
-        EXTRACT_READS(ch_input)
-        FIND_GBC(SEARCH_PATTERNS.out.search_patterns, EXTRACT_READS.out.reads)
-        CORRECT_AND_COUNT(FIND_GBC.out.GBC)
+        EXTRACT_GBC(ch_input, SEARCH_PATTERNS.out.search_patterns)
+        CORRECT_AND_COUNT(EXTRACT_GBC.out.GBC)
         INFER_PREVALENCES(CORRECT_AND_COUNT.out.counts)
 
         generate_run_summary_bulk(

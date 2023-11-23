@@ -37,14 +37,14 @@ workflow sc {
         FASTA_FROM_REF(ch_tenx)
         BOWTIE_INDEX_REF(FASTA_FROM_REF.out.fasta)
         GET_GBC_ELEMENTS(MERGE_GBC.out.reads.combine(SOLO.out.filtered, by:0))
-        GBC_TO_FASTA(GET_GBC_ELEMENTS.out.elements.map{ it -> tuple(it[0], it[3]) })
+        GBC_TO_FASTA(GET_GBC_ELEMENTS.out.elements)
         ALIGN_GBC(BOWTIE_INDEX_REF.out.index.combine(GBC_TO_FASTA.out.fasta, by:0))
         CELL_ASSIGNMENT(GET_GBC_ELEMENTS.out.elements.combine(ALIGN_GBC.out.names, by:0))
 
         // Summary
         summary_input = MERGE_TENX.out.reads.map{ it -> tuple(it[0], it[1]) }
             .combine(MERGE_GBC.out.reads.map{ it -> tuple(it[0], it[1]) }, by:0)
-            .combine(GET_GBC_ELEMENTS.out.elements.map{ it -> tuple(it[0], it[3]) }, by:0)
+            .combine(GET_GBC_ELEMENTS.out.elements, by:0)
             .combine(SOLO.out.filtered, by:0)
             .combine(CELL_ASSIGNMENT.out.cells_summary, by:0)
             .combine(CELL_ASSIGNMENT.out.clones_summary, by:0)

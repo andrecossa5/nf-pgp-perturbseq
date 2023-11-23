@@ -9,7 +9,7 @@ process CELL_ASSIGNMENT {
   tag "${sample_name}"
   
   input:
-  tuple val(sample_name), path(CBCs), path(UMIs), path(GBCs), path(reads_aligned_to_ref)
+  tuple val(sample_name), path(elements), path(reads_aligned_to_ref)
 
   output:
   tuple val(sample_name), path("CBC_GBC_combos.tsv.gz"), emit: CBC_GBC_combos
@@ -20,7 +20,7 @@ process CELL_ASSIGNMENT {
   script:
   """
   python ${baseDir}/bin/sc/cell_assignment.py \
-  ${CBCs} ${UMIs} ${GBCs} ${reads_aligned_to_ref}
+  ${elements} ${reads_aligned_to_ref}
   """
 
   stub:
