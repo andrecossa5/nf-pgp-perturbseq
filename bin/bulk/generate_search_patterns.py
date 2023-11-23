@@ -18,13 +18,8 @@ for i in range(len(sequence)):
 (
     pd.DataFrame(L)
     .to_csv(
-        os.path.join(
-            os.getcwd(),
-            'search_patterns.tsv'
-        ),
-        header=False, 
-        index=False,
-        sep='\t'
+        os.path.join(os.getcwd(), 'search_patterns.tsv'),
+        header=False, index=False, sep='\t'
     )
 )
 
