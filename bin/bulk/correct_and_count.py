@@ -121,8 +121,8 @@ def process_one_GBC(df, threshold):
 
 def main():
 
-    # Remove short GBCs (len == 18bp), count and save all raw_counts
-    GBCs = dd.read_csv(path_i, header=None)[0]
+    # Remove short GBCs (len == 18bp), count and retaint only GBC > 1 read
+    GBCs = dd.read_csv(path_i, header=None, sep='\t')[0]
     is_18bp = GBCs.map(lambda x: len(x) == 18)
     GBCs = GBCs.loc[is_18bp]
     GBC_counts = GBCs.value_counts().compute().astype(np.int32)
@@ -158,7 +158,7 @@ def main():
 
     # Filter out correct-degenerated ambigous pairs with too low or too similar read_counts:
     # This will not be considered for correction.
-    df = df.query('n_reads_correct>=@min_n_reads and n_reads_correct>=@min_n_reads*n_reads_degenerated')
+    df = df.query('n_reads_correct>=@min_n_reads and n_reads_correct>=10*n_reads_degenerated')
 
     # To the remaining correct GBCs, add counts from the corresponding degenerated barcodes 
     # NB: not from all of them, but only the ones at <= <treshold> hamming distance

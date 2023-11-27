@@ -168,7 +168,7 @@ def main():
     f.write(f'--anchor_sequence:                {anchor_sequence} \n')
     f.write('\n')
     f.write('Numbers: \n')
-    f.write(f'- Reads with GBC:                 {int(total_GBC_reads)} \n')
+    f.write(f'- Reads with GBC (>1 read):       {int(total_GBC_reads)} \n')
     f.write(f'- Unique GBCs:                    {int(n_unique_GBCs)} \n')
     f.write(f'  * corrected:                    {int(n_corrected)} \n')
     f.write(f'  * not_whitelisted:              {int(n_not_whitelisted)} \n')

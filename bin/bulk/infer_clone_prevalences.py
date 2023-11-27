@@ -86,12 +86,10 @@ from sklearn.mixture import GaussianMixture
 import matplotlib.pyplot as plt
 
 
-# Define helper functions
-
-
 ##
 
 
+# Define helper functions
 def rev_complement(x):
     d = {'A':'T', 'G':'C', 'T':'A', 'C':'G'}
     x = list(x)
