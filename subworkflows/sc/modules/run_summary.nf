@@ -35,7 +35,7 @@ process generate_run_summary_sc {
     echo "--sc_gbc:                ${params.sc_gbc}" >> run_summary.txt
     echo "--sc_outdir:               ${params.sc_outdir}" >> run_summary.txt
     echo "--step_1_out:           ${params.sc_outdir}" >> run_summary.txt
-    echo "--pattern:              ${params.sc_pattern}" >> run_summary.txt
+    echo "--pattern:              ${params.sc_anchor}" >> run_summary.txt
     echo "--ref:                  ${params.ref}" >> run_summary.txt
     echo "Numbers" >> run_summary.txt
     echo "- Transcriptomic reads:            \$(zcat ${R1_tenx} | awk 'END{print NR/4}' | LC_ALL=en_US.UTF-8 awk '{ printf("%'"'"'d", \$0) }')" >> run_summary.txt

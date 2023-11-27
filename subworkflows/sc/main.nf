@@ -5,12 +5,8 @@ nextflow.enable.dsl = 2
 // Include here
 include { MERGE_TENX } from "./modules/merge_tenx.nf"
 include { MERGE_GBC } from "./modules/merge_gbc.nf"
-include { FASTA_FROM_REF } from "./modules/fasta_from_ref.nf"
-include { BOWTIE_INDEX_REF } from "./modules/create_bowtie_index_ref.nf"
 include { SOLO } from "./modules/Solo.nf"
 include { GET_GBC_ELEMENTS } from "./modules/filter_and_extract_from_GBC.nf"
-include { GBC_TO_FASTA } from "./modules/gbc_to_fasta.nf"
-include { ALIGN_GBC } from "./modules/align_GBC_to_ref.nf"
 include { CELL_ASSIGNMENT } from "./modules/cell_assignment.nf"
 include { generate_run_summary_sc } from "./modules/run_summary.nf"
 include { publish_sc } from "./modules/publish.nf"
@@ -34,12 +30,8 @@ workflow sc {
         SOLO(MERGE_TENX.out.reads)
  
         // Assign cells to clones
-        FASTA_FROM_REF(ch_tenx)
-        BOWTIE_INDEX_REF(FASTA_FROM_REF.out.fasta)
         GET_GBC_ELEMENTS(MERGE_GBC.out.reads.combine(SOLO.out.filtered, by:0))
-        GBC_TO_FASTA(GET_GBC_ELEMENTS.out.elements)
-        ALIGN_GBC(BOWTIE_INDEX_REF.out.index.combine(GBC_TO_FASTA.out.fasta, by:0))
-        CELL_ASSIGNMENT(GET_GBC_ELEMENTS.out.elements.combine(ALIGN_GBC.out.names, by:0))
+        CELL_ASSIGNMENT(GET_GBC_ELEMENTS.out.elements)
 
         // Summary
         summary_input = MERGE_TENX.out.reads.map{ it -> tuple(it[0], it[1]) }
