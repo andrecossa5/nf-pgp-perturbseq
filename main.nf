@@ -31,7 +31,7 @@ map_bulk_sc = Channel
 //
 
 //----------------------------------------------------------------------------//
-// Perturb-seq pipeline entry points and main workflow
+// Perturb-seq pipeline entry points and main workflow: stable
 //----------------------------------------------------------------------------//
 
 workflow bulk_only {
