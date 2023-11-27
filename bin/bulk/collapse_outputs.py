@@ -120,8 +120,9 @@ def write_correction_summary(path_input, path_output, folder_d):
 		d_['perc_corrected'] = df_all.query('status == "corrected"').shape[0] / df_all.shape[0]
 		d_['perc_added_reads'] = np.median(df_corr['n_reads_added'] / df_corr['n_reads_before_correction'])
 		df_common = df_good.loc[lambda x: x['found_wi'] & x['found_wo']]
-		d_['pearson'] = pearsonr(df_common['cellular_prevalence_wi'], df_common['cellular_prevalence_wo'])[0]
-		d_['spearman'] = spearmanr(df_common['cellular_prevalence_wi'], df_common['cellular_prevalence_wo'])[0]
+		if df_common.shape[0]>10:
+			d_['pearson'] = pearsonr(df_common['cellular_prevalence_wi'], df_common['cellular_prevalence_wo'])[0]
+			d_['spearman'] = spearmanr(df_common['cellular_prevalence_wi'], df_common['cellular_prevalence_wo'])[0]
 		d[name] = d_
 	df = pd.DataFrame(d).T
 
@@ -139,8 +140,11 @@ def write_correction_summary(path_input, path_output, folder_d):
 		f.write(f' * % reads added at correction: {df["perc_added_reads"].median():.2f} (+-{df["perc_added_reads"].std():.2f}) \n')
 		f.write('\n')
 		f.write('- Cellular prevalences correlation (i.e., common clones detected w/i and w/o spikeins): \n')
-		f.write(f' * Pearson\'s correlation: {df["pearson"].median():.2f} (+-{df["pearson"].std():.2f}) \n')
-		f.write(f' * Spearman\'s correlation: {df["spearman"].median():.2f} (+-{df["spearman"].std():.2f}) \n')
+		try:
+			f.write(f' * Pearson\'s correlation: {df["pearson"].median():.2f} (+-{df["pearson"].std():.2f}) \n')
+			f.write(f' * Spearman\'s correlation: {df["spearman"].median():.2f} (+-{df["spearman"].std():.2f}) \n')
+		except:
+			f.write(f' * Pearson\'s correlations cannot be calculated...')
 		f.write('\n')
 
 
