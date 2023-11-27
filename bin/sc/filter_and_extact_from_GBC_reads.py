@@ -34,7 +34,7 @@ for r1,r2 in fqs_in:
     umi = r1.sequence[16:16+12]
     a_ = r2.sequence[:33]
     gbc = r2.sequence[33:33+18]
-    h = hamming(list(a_), list(anchor))[0] * 33
+    h = hamming(list(a_), list(anchor)) * 33
     if cbc in solo_CBCs.index and h <= int(treshold):
         el.write(f'@{name}\t{cbc}\t{umi}\t{gbc}\n')
 
