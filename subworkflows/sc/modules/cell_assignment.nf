@@ -23,7 +23,8 @@ process CELL_ASSIGNMENT {
   ${sample_name} \
   ${params.bulk_outdir}/${sample_name}/clonal_prevalences.csv \
   ${elements} \
-  ${params.cell_assignment_method}
+  ${params.cell_assignment_method} \
+  ${task.cpus}
   """
 
   stub:

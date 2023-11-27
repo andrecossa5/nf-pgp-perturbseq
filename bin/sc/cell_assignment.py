@@ -44,6 +44,7 @@ sample = sys.argv[1]
 path_bulk = sys.argv[2]
 path_sc = sys.argv[3]
 method = sys.argv[4]
+ncores = sys.argv[5]
 
 # sample = 'AA'
 # path_bulk = '/Users/IEO5505/Desktop/PD/tmp_bulk/clonal_prevalences.csv'
@@ -67,7 +68,7 @@ sc = sc_df['GBC'].value_counts().compute()
 # Map sc GBCs to bulk GBCs: if hamming <=3, correct sc GBCs to bulk GBCs
 sc_A = to_numeric(np.vstack(sc.index.map(lambda x: np.array(list(x)))))
 bulk_A = to_numeric(np.vstack(bulk.index.map(lambda x: np.array(list(x)))))
-D = pairwise_distances(sc_A, bulk_A, metric='hamming', n_jobs=8) * sc_A.shape[1]
+D = pairwise_distances(sc_A, bulk_A, metric='hamming', n_jobs=ncores) * sc_A.shape[1]
 df_correction = (
     sc.to_frame('read_count')
     .assign(
