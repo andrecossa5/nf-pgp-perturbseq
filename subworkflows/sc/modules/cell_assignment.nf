@@ -20,7 +20,10 @@ process CELL_ASSIGNMENT {
   script:
   """
   python ${baseDir}/bin/sc/cell_assignment.py \
-  ${sample_name} ${params.bulk_outdir}/${sample_name} ${elements} ${params.cell_assignment_method}
+  ${sample_name} \
+  ${params.bulk_outdir}/${sample_name}/clonal_prevalences.csv \
+  ${elements} \
+  ${params.cell_assignment_method}
   """
 
   stub:
