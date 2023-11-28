@@ -31,7 +31,7 @@ map_bulk_sc = Channel
 //
 
 //----------------------------------------------------------------------------//
-// Perturb-seq pipeline entry points and main workflow: stable
+// Perturb-seq pipeline entry points and main workflow: UMI_tools_graph_clustering
 //----------------------------------------------------------------------------//
 
 workflow bulk_only {
