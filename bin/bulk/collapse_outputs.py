@@ -49,26 +49,18 @@ path_output = args.output
 
 ##
 
-# path_input = '/Users/IEO5505/Desktop/example_perturb/step_1_out'
-# path_output = '/Users/IEO5505/Desktop/example_perturb/step_1_out'
-
-##
-
-
 # Import code
 import numpy as np
 import pandas as pd
 import shutil
 from scipy.stats import spearmanr, pearsonr
-from mito_utils.utils import *
-from mito_utils.plotting_base import *
+from plotting_utils._utils import *
 
 
 ##
 
 
 # Helpers
-
 def concat_df(path_input, folder_d, string_pattern):
 
 	L = []
@@ -128,8 +120,9 @@ def write_correction_summary(path_input, path_output, folder_d):
 		d_['perc_corrected'] = df_all.query('status == "corrected"').shape[0] / df_all.shape[0]
 		d_['perc_added_reads'] = np.median(df_corr['n_reads_added'] / df_corr['n_reads_before_correction'])
 		df_common = df_good.loc[lambda x: x['found_wi'] & x['found_wo']]
-		d_['pearson'] = pearsonr(df_common['cellular_prevalence_wi'], df_common['cellular_prevalence_wo'])[0]
-		d_['spearman'] = spearmanr(df_common['cellular_prevalence_wi'], df_common['cellular_prevalence_wo'])[0]
+		if df_common.shape[0]>10:
+			d_['pearson'] = pearsonr(df_common['cellular_prevalence_wi'], df_common['cellular_prevalence_wo'])[0]
+			d_['spearman'] = spearmanr(df_common['cellular_prevalence_wi'], df_common['cellular_prevalence_wo'])[0]
 		d[name] = d_
 	df = pd.DataFrame(d).T
 
@@ -147,97 +140,12 @@ def write_correction_summary(path_input, path_output, folder_d):
 		f.write(f' * % reads added at correction: {df["perc_added_reads"].median():.2f} (+-{df["perc_added_reads"].std():.2f}) \n')
 		f.write('\n')
 		f.write('- Cellular prevalences correlation (i.e., common clones detected w/i and w/o spikeins): \n')
-		f.write(f' * Pearson\'s correlation: {df["pearson"].median():.2f} (+-{df["pearson"].std():.2f}) \n')
-		f.write(f' * Spearman\'s correlation: {df["spearman"].median():.2f} (+-{df["spearman"].std():.2f}) \n')
+		try:
+			f.write(f' * Pearson\'s correlation: {df["pearson"].median():.2f} (+-{df["pearson"].std():.2f}) \n')
+			f.write(f' * Spearman\'s correlation: {df["spearman"].median():.2f} (+-{df["spearman"].std():.2f}) \n')
+		except:
+			f.write(f' * Pearson\'s correlations cannot be calculated...')
 		f.write('\n')
-
-
-##
-
-
-def plot_n_clones(df_prevalences, wi_spikeins=True, ax=None):
-
-	col_ = 'found_wi' if wi_spikeins else 'found_wo'
-	df_ =	(
-		df_prevalences.loc[lambda x: x[col_]]
-		.reset_index()
-		.groupby(['sample', 'index'])
-		.size()
-		.reset_index()
-		.groupby('sample')
-		.size()
-		.to_frame('n')
-	)
-
-	bar(df_, 'n', ax=ax, s=.75, c='k')
-	t = "w/i" if wi_spikeins else "W/o"
-	format_ax(ax, title=f'{t} spikeins', xticks=df_.index, ylabel='n')
-	ax.spines[['right', 'top']].set_visible(False)
-
-	return ax
-
-
-##
-
-
-def plot_cumsum(df_prevalences, wi_spikeins=True, ax=None):
-	
-	col_ = 'cellular_prevalence_wi' if wi_spikeins else 'cellular_prevalence_wo'
-	for x in df_prevalences['sample'].unique():
-		pr = df_prevalences.query('sample == @x')[col_].cumsum()
-		ax.plot(pr.values, 'k.-', label=x)
-
-	t = 'w/i' if wi_spikeins else 'w/o' 
-	format_ax(
-		ax, title=f'Cumulative clone prevalences, {t} spikeins', 
-		xticks='', xlabel='Ranked clones', ylabel='Prevalence'
-	)
-	ax.spines[['right', 'top']].set_visible(False)
-
-	return ax
-
-
-##
-
-
-def plot_SH(df_prevalences, wi_spikeins=True, ax=None):
-
-	col_ = 'cellular_prevalence_wi' if wi_spikeins else 'cellular_prevalence_wo'
-	sh = (
-		df_prevalences
-		.groupby('sample')
-		.apply(lambda x: -np.sum(x[col_]*np.log10(x[col_])))
-		.sort_values(ascending=False)
-	)
-	ax.plot(np.arange(sh.size), sh, 'ko', markersize=7.5)
-	t = 'w/i' if wi_spikeins else 'w/o' 
-	format_ax(ax, title=f'Shannon Entropy ({t} spikins)', xticks=sh.index, ylabel='SH')
-	ax.set(xlim=(-1,sh.size))
-	ax.grid(axis='y')
-	ax.spines[['right', 'left', 'top']].set_visible(False)
-
-	return ax
-
-
-##
-
-
-def find_common_clones(df_prevalences, wi_spikeins=True):
-
-	col_ = 'found_wi' if wi_spikeins else 'found_wo'
-	sets = (
-		df_prevalences
-		.groupby('sample')
-		.apply(lambda x: set(x.loc[x[col_]].index))
-	)
-	X = np.ones((len(sets),len(sets)))
-	for i, x in enumerate(sets):
-		for j, y in enumerate(sets):
-			X[i,j] = len(x&y) # / len(x|y)
-
-	df = pd.DataFrame(X, columns=sets.index, index=sets.index)
-
-	return df
 
 
 ##
@@ -253,7 +161,6 @@ def main():
 	make_folder(path_output, 'summary', overwrite=True)
 	make_folder(os.path.join(path_output, 'summary'), 'prevalences', overwrite=True)
 	make_folder(os.path.join(path_output, 'summary'), 'spikeins', overwrite=True)
-	make_folder(os.path.join(path_output, 'summary'), 'viz', overwrite=True)
 
 	folder_d = get_folder_d(path_input)
 
@@ -301,54 +208,6 @@ def main():
 
 
 	##
-
-
-	# Viz
-
-	# n clones
-	fig, axs = plt.subplots(1,2,figsize=(12,5), constrained_layout=True)
-	plot_n_clones(df_prevalences, wi_spikeins=True, ax=axs[0])
-	plot_n_clones(df_prevalences, wi_spikeins=False, ax=axs[1])
-	fig.suptitle('n clones')
-	fig.savefig(os.path.join(path_output, 'summary', 'viz', 'n_clones.png'), dpi=300)
-
-	##
-
-	# Clones cumulative distributions
-	fig, axs = plt.subplots(1,2,figsize=(11, 5))
-	plot_cumsum(df_prevalences, wi_spikeins=True, ax=axs[0])
-	plot_cumsum(df_prevalences, wi_spikeins=False, ax=axs[1])
-	fig.tight_layout()
-	fig.savefig(os.path.join(path_output, 'summary', 'viz', 'cumsum.png'), dpi=300)
-
-	##
-
-	# Shannon entropy
-	fig, axs = plt.subplots(1,2,figsize=(12, 5))
-	plot_SH(df_prevalences, wi_spikeins=True, ax=axs[0])
-	plot_SH(df_prevalences, wi_spikeins=False, ax=axs[1])
-	fig.tight_layout()
-	fig.savefig(os.path.join(path_output, 'summary', 'viz', 'SH.png'), dpi=300)
-
-	##
-
-	# Common
-	fig, axs = plt.subplots(1,2,figsize=(11, 5.5))
-	df_ = find_common_clones(df_prevalences, wi_spikeins=True)
-	plot_heatmap(
-		df_, ax=axs[0], title='Common clones (w/i spikeins)', annot=True, label='n clones',
-		x_names_size=9, y_names_size=9, annot_size=7
-	)
-	df_ = find_common_clones(df_prevalences, wi_spikeins=False)
-	plot_heatmap(
-		df_, ax=axs[1], title='Common clones (w/o spikeins)', annot=True, label='n clones',
-		x_names_size=9, y_names_size=9, annot_size=7
-	)
-	fig.tight_layout()
-	fig.savefig(os.path.join(path_output, 'summary', 'viz', 'common_clones.png'), dpi=300)
-
-
-##
 
 
 ##########################################################

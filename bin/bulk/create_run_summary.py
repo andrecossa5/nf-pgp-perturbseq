@@ -19,18 +19,6 @@ my_parser = argparse.ArgumentParser(
     """
 )
 
-
-# reads
-my_parser.add_argument(
-    '--reads', 
-    type=str,
-    default=None,
-    help='''
-        The path to extracted GBCs file. Must be a .csv file, 
-        with one column. Default: . .
-        '''
-)
-
 # indir
 my_parser.add_argument(
     '--indir', 
@@ -101,7 +89,6 @@ my_parser.add_argument(
 
 # Parse arguments
 args = my_parser.parse_args()
-path_reads = args.reads
 indir = args.indir
 outdir = args.outdir
 anchor_sequence = args.anchor_sequence
@@ -116,7 +103,6 @@ path_o = args.output
 
 
 # Import code
-import gzip
 import getpass
 import datetime
 import numpy as np
@@ -131,12 +117,6 @@ import pandas as pd
 def main():
 
     # Calculate stats
-
-    # Total reads
-    total_reads = 0
-    with gzip.open(path_reads, 'rt') as f:
-        for _ in f:
-            total_reads += 1
 
     # Others
     df_ = pd.read_csv(path_read_counts, index_col=0)
@@ -188,8 +168,7 @@ def main():
     f.write(f'--anchor_sequence:                {anchor_sequence} \n')
     f.write('\n')
     f.write('Numbers: \n')
-    f.write(f'- Reads in input:                 {int(total_reads)} \n')
-    f.write(f'- Reads with GBC:                 {int(total_GBC_reads)} \n')
+    f.write(f'- Reads with GBC (>1 read):       {int(total_GBC_reads)} \n')
     f.write(f'- Unique GBCs:                    {int(n_unique_GBCs)} \n')
     f.write(f'  * corrected:                    {int(n_corrected)} \n')
     f.write(f'  * not_whitelisted:              {int(n_not_whitelisted)} \n')

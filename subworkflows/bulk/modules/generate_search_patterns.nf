@@ -11,9 +11,8 @@ process SEARCH_PATTERNS {
 
   script:
   """
-  Rscript \
-  ${baseDir}/bin/bulk/generate_search_patterns.R \
-  ${params.anchor_sequence}
+  python \
+  ${baseDir}/bin/bulk/generate_search_patterns.py ${params.anchor_sequence}
   """
 
   stub:
