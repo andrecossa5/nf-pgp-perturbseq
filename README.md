@@ -6,15 +6,16 @@ Major steps:
 
 BULK DNA libraries
 
-- Extract GBC reads (<=1 mismatch from DNA anchor sequence) observed >1 read.
-- Graph-based correction. Unique GBC sequences are clustered and read counts from degenerate
-  sequences are passed to the "correct" ones.
+- Extract GBC reads (<=1 mismatch from DNA anchor sequence).
+- Graph-based correction. Unique GBC sequences (>1 read) are clustered and read counts from degenerate
+  sequences are passed to the "correct" ones. Spikeins are removed and resulting GBC sequences are filtered 
+  (read_counts > bulk_min_n_reads).
 - Reference GBC pool construction. A reference GBC whitelist is obtained from all samples.
 - (Optional) clone calling step from bulk DNA. Two methods implemented: a. uses spike-ins
   information, and b. does not, relying on distributional properties of the GBC-sequences
   read counts only. 
 
-Note: MOI of lentiviral infection must be very low (e.g., <=.1) to retrieve clones from bulk DNA-sequencing, to ensure one GBC --> one clone. 
+Note: MOI of lentiviral infection must be very low (e.g., <= 0.1) to retrieve clones from bulk DNA-sequencing, to ensure one GBC <--> one clone. 
 
 SC libraries (10X and GBC reads)
 
