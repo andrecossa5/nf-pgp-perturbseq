@@ -17,6 +17,10 @@ path_filtered = sys.argv[3]
 anchor = sys.argv[4]
 treshold = sys.argv[5]
 
+
+##
+
+
 # Read Solo-filtered CBCs 
 solo_CBCs = pd.read_csv(
     os.path.join(path_filtered, 'barcodes.tsv.gz'), 

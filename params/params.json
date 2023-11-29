@@ -2,18 +2,22 @@
 
     "bulk_indir" : "/hpcnfs/scratch/PGP/acossa/nf-perturbseq/tests/pp/data/perturb_bulk/",
     "bulk_outdir" : "/hpcnfs/scratch/PGP/acossa/nf-perturbseq/tests/pp/results/perturb_bulk/",
-    "sc_gbc" : "/hpcnfs/scratch/PGP/acossa/nf-perturbseq/tests/pp/data/perturb_gbc/",
-    "sc_tenx" : "/hpcnfs/scratch/PGP/acossa/nf-perturbseq/tests/pp/data/perturb_tenx/",
-    "sc_outdir" : "/hpcnfs/scratch/PGP/acossa/nf-perturbseq/tests/pp/results/perturb_sc/",
     "bulk_sc_map" : "/hpcnfs/scratch/PGP/acossa/nf-perturbseq/tests/pp/data/bulk_sc_map.csv",
     "bulk_graph_clustering_hamming_treshold" : 3,
     "bulk_min_n_reads" : 1000,
-    
-    "sc_anchor" : "TAGCAAACTGGGGCACAAGCTTAATTAAGAATT",
-    "sc_anchor_treshold" : 1,
-    "cell_assignment_method" : "unique_combos",
     "bulk_anchor_sequence" : "GGGTTTAAACGGGCCCTCTAG",
     "spikeins_table" : "/hpcnfs/scratch/PGP/acossa/nf-perturbseq/tests/meta/spikeins_table.csv",
+
+    "sc_gbc" : "/hpcnfs/scratch/PGP/acossa/nf-perturbseq/tests/pp/data/perturb_gbc/",
+    "sc_tenx" : "/hpcnfs/scratch/PGP/acossa/nf-perturbseq/tests/pp/data/perturb_tenx/",
+    "sc_outdir" : "/hpcnfs/scratch/PGP/acossa/nf-perturbseq/tests/pp/results/perturb_sc/",
+    "sc_anchor" : "TAGCAAACTGGGGCACAAGCTTAATTAAGAATT",
+    "sc_anchor_treshold" : 1,
+    "bulk_sc_treshold" : 1,
+    "umi_treshold" : 5,
+    "read_treshold" : 15,
+    "coverage_treshold" : 3, 
+    "cell_assignment_method" : "unique_combos",
     "whitelist" : "/hpcnfs/data/PGP/reference_genomes/custom/10x_whitelists/v3.txt",
     "ref" : "/hpcnfs/data/PGP/reference_genomes/custom/STARsolo_new/"
 }
