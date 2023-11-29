@@ -13,24 +13,27 @@ process CORRECT_AND_COUNT {
   tuple val(sample_name), path(GBC)
 
   output:
-  tuple val(sample_name), path('GBC_counts.csv'), emit: counts
+  tuple val(sample_name), path('GBC_raw_counts.csv.gz'), emit: raw_counts
+  tuple val(sample_name), path('GBC_counts_corrected.csv'), emit: corrected_counts
   tuple val(sample_name), path('correction_df.csv'), emit: correction_df
-  tuple val(sample_name), path('whitelist.csv'), emit: whitelist
 
   script:
   """
   python \
   ${baseDir}/bin/bulk/correct_and_count.py \
   -i ${GBC} \
-  -t ${params.hamming_distance_treshold} \
-  --method directional
+  -t ${params.bulk_graph_clustering_hamming_treshold} \
+  --method directional \
+  --min_n_reads ${params.bulk_min_n_reads} \
+  --min_n_reads ${params.bulk_min_n_reads} \
+  --spikeins ${params.spikeins_table}
   """
 
   stub:
   """
-  touch GBC_counts.csv
+  touch GBC_raw_counts.csv.gz
   touch correction_df.csv
-  touch whitelist.csv
+  touch GBC_counts_corrected.csv
   """
 
 }

@@ -12,27 +12,15 @@ process publish_bulk {
   publishDir "${params.bulk_outdir}/${sample_name}/", mode: 'copy'
 
   input:
-  tuple val(sample_name), path(counts)
+  tuple val(sample_name), path(raw_counts)
+  tuple val(sample_name), path(corrected_counts)
   tuple val(sample_name), path(correction_df)
-  tuple val(sample_name), path(whitelist)
-  tuple val(sample_name), path(stats_table)
-  tuple val(sample_name), path(prevalences_plot)
-  tuple val(sample_name), path(spikeins_plot)
-  tuple val(sample_name), path(df_spikeins)
-  tuple val(sample_name), path(distributions_1read)
-  tuple val(sample_name), path(distributions_morereads)
   tuple val(sample_name), path(run_summary)
 
   output:
-  path counts
+  path raw_counts
+  path corrected_counts
   path correction_df
-  path whitelist
-  path stats_table
-  path prevalences_plot
-  path spikeins_plot
-  path df_spikeins
-  path distributions_1read
-  path distributions_morereads
   path run_summary
   val sample_name, emit: finish_flag
 

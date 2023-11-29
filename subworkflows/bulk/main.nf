@@ -18,29 +18,22 @@ workflow bulk {
 
   take:
       ch_input
-
+ 
   main:
       SEARCH_PATTERNS()
       EXTRACT_GBC(ch_input, SEARCH_PATTERNS.out.search_patterns)
       CORRECT_AND_COUNT(EXTRACT_GBC.out.GBC)
-      INFER_PREVALENCES(CORRECT_AND_COUNT.out.counts)
   
       // Summary and cleanup 
       generate_run_summary_bulk(
-        CORRECT_AND_COUNT.out.counts,
+        CORRECT_AND_COUNT.out.raw_counts,
+        CORRECT_AND_COUNT.out.corrected_counts,
         CORRECT_AND_COUNT.out.correction_df,
-        INFER_PREVALENCES.out.stats_table
       )
       publish_bulk(
-        CORRECT_AND_COUNT.out.counts,
+        CORRECT_AND_COUNT.out.raw_counts,
+        CORRECT_AND_COUNT.out.corrected_counts,
         CORRECT_AND_COUNT.out.correction_df,
-        CORRECT_AND_COUNT.out.whitelist,
-        INFER_PREVALENCES.out.stats_table,
-        INFER_PREVALENCES.out.prevalences_plot,
-        INFER_PREVALENCES.out.spikeins_plot,
-        INFER_PREVALENCES.out.df_spikeins,
-        INFER_PREVALENCES.out.distributions_1read,
-        INFER_PREVALENCES.out.distributions_morereads,
         generate_run_summary_bulk.out.summary
       )
       collapse_output(
@@ -49,5 +42,4 @@ workflow bulk {
 
   emit:
       flags = publish_bulk.out.finish_flag.collect()
-
 }

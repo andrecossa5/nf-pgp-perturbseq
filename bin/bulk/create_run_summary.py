@@ -45,10 +45,10 @@ my_parser.add_argument(
 
 # read_counts
 my_parser.add_argument(
-    '--read_counts',
+    '--raw_counts',
     type=str,
     default=None,
-    help='Path to formatted GBC read counts. Default: . .'
+    help='Path to raw_counts, all observed GBC sequences. Default: . .'
 )
 
 # Sample
@@ -69,18 +69,34 @@ my_parser.add_argument(
 
 # stats_table
 my_parser.add_argument(
-    '--stats_table',
+    '--corrected_counts',
     type=str,
     default=None,
-    help='Prevalence df as generated in infer_clone_prevalences.py.'
+    help='Corrected counts for filtered, high quality GBC sequences.'
 )
 
-# treshold
+# 
 my_parser.add_argument(
     '--output',
     type=str,
     default=os.getcwd(),
-    help='Ouput folder path. Default: . .'
+    help='Path to write output. Default: cwd.'
+)
+
+# Min_n_reads
+my_parser.add_argument(
+    '--min_n_reads',
+    type=int,
+    default=1000,
+    help='Min number of reads for a filtered GBC. Default: 1000.'
+)
+
+# Min_n_reads
+my_parser.add_argument(
+    '--hamming_treshold',
+    type=int,
+    default=3,
+    help='Hamming treshold to find GBCs communities via UMItools clusterer. Default: 3.'
 )
 
 
@@ -91,11 +107,13 @@ my_parser.add_argument(
 args = my_parser.parse_args()
 indir = args.indir
 outdir = args.outdir
-anchor_sequence = args.anchor_sequence
-path_read_counts = args.read_counts
 sample = args.sample
-path_correction_df = args.correction_df
-stats_table = args.stats_table
+anchor_sequence = args.anchor_sequence
+min_n_reads = args.min_n_reads
+hamming_treshold = args.hamming_treshold
+raw_counts = args.raw_counts
+corrected_counts = args.corrected_counts
+correction_df = args.correction_df
 path_o = args.output
 
 
@@ -105,7 +123,6 @@ path_o = args.output
 # Import code
 import getpass
 import datetime
-import numpy as np
 import pandas as pd
 
 
@@ -118,33 +135,20 @@ def main():
 
     # Calculate stats
 
-    # Others
-    df_ = pd.read_csv(path_read_counts, index_col=0)
-    total_GBC_reads = df_['read_count'].sum()
+    df_ = pd.read_csv(raw_counts, index_col=0)
+    total_GBC_reads = df_['read_counts'].sum()
     n_unique_GBCs = df_.shape[0]
+    del df_
 
-    status_counts = df_['status'].value_counts()
-    try:
-        n_corrected = status_counts['corrected']
-        n_not_whitelisted = status_counts['not_whitelisted']
-        n_degenerated_removed = status_counts['degenerated_to_remove']
-        n_degenerated_not_removed = status_counts['degenerated_not_to_remove']
-    except:
-        n_corrected = 0
-        n_not_whitelisted = 0
-        n_degenerated_removed = 0
-        n_degenerated_not_removed = 0
-        print('Some problem occurred...')
-    
-    df_ = pd.read_csv(path_correction_df, index_col=0)   
-    median_n_degenerated = df_['n_degenerated'].median()
-    median_n_reads_added = df_['n_reads_added'].median()
+    df_ = pd.read_csv(corrected_counts, index_col=0)
+    n_filtered_GBCs = df_.shape[0]
+    del df_
 
-    df_ = pd.read_csv(stats_table, index_col=0) 
-    n_unique_wi = np.sum(df_['found_wi'])
-    n_unique_wo = np.sum(df_['found_wo'])
-    median_pr_wi = df_['cellular_prevalence_wi'].median()
-    median_pr_wo = df_['cellular_prevalence_wi'].median()
+    df_ = pd.read_csv(correction_df)
+    n_corrected = df_['correct'].unique().size
+    n_degenerated = df_['degenerated'].unique().size
+    median_n_reads_added = df_['n_reads_degenerated'].median()
+    del df_
 
 
     ##
@@ -166,20 +170,17 @@ def main():
     f.write(f'--indir:                          {indir} \n')
     f.write(f'--outdir:                         {outdir} \n')
     f.write(f'--anchor_sequence:                {anchor_sequence} \n')
+    f.write(f'--min_n_reads:                    {min_n_reads} \n')
+    f.write(f'--hamming_treshold:               {hamming_treshold} \n')
     f.write('\n')
     f.write('Numbers: \n')
-    f.write(f'- Reads with GBC (>1 read):       {int(total_GBC_reads)} \n')
+    f.write(f'- Reads with GBC:                 {int(total_GBC_reads)} \n')
     f.write(f'- Unique GBCs:                    {int(n_unique_GBCs)} \n')
-    f.write(f'  * corrected:                    {int(n_corrected)} \n')
-    f.write(f'  * not_whitelisted:              {int(n_not_whitelisted)} \n')
-    f.write(f'  * degenerated, removed:         {int(n_degenerated_removed)} \n')
-    f.write(f'  * degenerated, not removed :    {int(n_degenerated_not_removed)} \n')
-    f.write(f'- Correction:                          \n')
-    f.write(f'  * Median n degenerated GBCs:    {median_n_degenerated:.2f} \n')
+    f.write(f'- Filtered GBCs:                  {int(n_filtered_GBCs)} \n')
+    f.write(f'- Correction:                     \n')
+    f.write(f'  * n corrected GBCs:             {n_corrected} \n')
+    f.write(f'  * n degenerated GBCs:           {n_degenerated} \n')
     f.write(f'  * Median n added reads:         {median_n_reads_added:.2f} \n')
-    f.write(f'- Clonal inference:                    \n')
-    f.write(f'  *  w/i spikeins:                {int(n_unique_wi)} unique clones, median prevalence {median_pr_wi:.2f}  \n')
-    f.write(f'  *  w/o spikeins:                {int(n_unique_wo)} unique clones, median prevalence {median_pr_wo:.2f}  \n')
     f.write('\n')
 
     f.close()

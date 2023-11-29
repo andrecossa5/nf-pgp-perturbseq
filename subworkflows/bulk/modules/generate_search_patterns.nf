@@ -12,7 +12,7 @@ process SEARCH_PATTERNS {
   script:
   """
   python \
-  ${baseDir}/bin/bulk/generate_search_patterns.py ${params.anchor_sequence}
+  ${baseDir}/bin/bulk/generate_search_patterns.py ${params.bulk_anchor_sequence}
   """
 
   stub:

@@ -6,7 +6,7 @@ Major steps:
 
 BULK DNA libraries
 
-- Find GBC reads (<=1 mismatch from DNA anchor sequence)
+- Extract GBC reads (<=1 mismatch from DNA anchor sequence) observed >1 read.
 - Graph-based correction. Unique GBC sequences are clustered and read counts from degenerate
   sequences are passed to the "correct" ones.
 - Reference GBC pool construction. A reference GBC whitelist is obtained from all samples.

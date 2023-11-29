@@ -46,7 +46,7 @@ my_parser.add_argument(
     '-t', 
     '--threshold',
     type=int,
-    default=1,
+    default=3,
     help='Maximum Hamming distance for which sequences can be clustered together.'
 )
 
@@ -62,8 +62,19 @@ my_parser.add_argument(
 my_parser.add_argument(
     '--min_n_reads',
     type=int,
-    default=1,
-    help='min_n_reads that a "correct" GBCs must have to be considered for error correction. Default: 100.'
+    default=1000,
+    help='''
+        min_n_reads that a "correct" GBCs must have to be considered to entry 
+        the final whitelist. Default: 1000.'
+        '''
+)
+
+# Spikeins
+my_parser.add_argument(
+    '--spikeins',
+    type=str,
+    default=None,
+    help='Path to spikeins table. Default: None.'
 )
 
 
@@ -77,6 +88,7 @@ path_o = args.output
 method = args.method
 threshold = args.threshold
 min_n_reads = args.min_n_reads
+spikeins = args.spikeins
 
 
 ##
@@ -87,31 +99,6 @@ import numpy as np
 import pandas as pd
 import dask.dataframe as dd
 from umi_tools import UMIClusterer
-from scipy.spatial.distance import hamming
-
-
-##
-
-
-# Helpers
-def process_one_GBC(df, threshold):
-
-    n_degenerated = df.shape[0]
-    test = df['hamming']<=threshold
-    fract_below_treshold = test.sum() / n_degenerated
-    n_before = df['n_reads_correct'].values[0]
-    n_reads_after_correction = n_before + df.loc[test, 'n_reads_degenerated'].sum()
-    diff = n_reads_after_correction - n_before
-
-    d = {
-        'n_degenerated' : n_degenerated,
-        'fract_below_treshold' : fract_below_treshold,
-        'n_reads_before_correction' : n_before,
-        'n_reads_after_correction' : n_reads_after_correction,
-        'n_reads_added' : diff
-    }
-
-    return pd.Series(d)
 
 
 ##
@@ -121,19 +108,23 @@ def process_one_GBC(df, threshold):
 
 def main():
 
-    # Remove short GBCs (len == 18bp), count and retaint only GBC > 1 read
+    # Remove short GBCs (len == 18bp), retain only GBC >1 read
     GBCs = dd.read_csv(path_i, header=None, sep='\t')[0]
     is_18bp = GBCs.map(lambda x: len(x) == 18)
     GBCs = GBCs.loc[is_18bp]
     GBC_counts = GBCs.value_counts().compute().astype(np.int32)
-    GBC_counts = GBC_counts.loc[lambda x: x>1].copy()
+    # Save all raw counts
+    GBC_counts.to_frame('read_counts').to_csv(os.path.join(path_o, 'GBC_raw_counts.csv.gz'))
 
-    # Generate GBC clusters, and reformat
+    # Cluster unique GBCs
+    GBC_counts = GBC_counts.loc[lambda x: x>1].copy() # Only >1 reads
     GBC_counts.index = GBC_counts.index.map(lambda x : x.encode('UTF-8'))
     clusterer = UMIClusterer(cluster_method=method)
     groups = clusterer(GBC_counts.to_dict(), threshold=threshold)
+    GBC_counts.index = GBC_counts.index.map(lambda x : x.decode('UTF-8'))
 
-    # To long whitelist df
+    # Get non-singletons and reformat
+    groups = [ g for g in groups if len(g)>1 ]
     df_l = [
         pd.DataFrame(
             [ ( g[0].decode("utf-8"), x.decode("utf-8") ) for x in g[1:] ],
@@ -145,41 +136,45 @@ def main():
     df = pd.concat(df_l)
     del df_l                    # Save memory
 
-    # Calculate hammings
-    df['hamming'] = [
-        hamming(np.array(list(x)), np.array(list(y))) * 18 \
-        for x, y in zip(df['correct'], df['degenerated'])
-    ]
-
-    # Add counts info to whitelist_df
-    GBC_counts.index = GBC_counts.index.map(lambda x : x.decode('UTF-8')) # Restore encoding
+    # Compute correction_df
     df['n_reads_correct'] = GBC_counts.loc[df['correct']].values
     df['n_reads_degenerated'] = GBC_counts.loc[df['degenerated']].values
+    corrected_counts = (
+        df.groupby('correct')
+        .apply(
+            lambda x: x['n_reads_correct'].unique()[0] + x['n_reads_degenerated'].sum()
+        )
+    )
+    df.to_csv(os.path.join(path_o, 'correction_df.csv'), index=False)
 
-    # Filter out correct-degenerated ambigous pairs with too low or too similar read_counts:
-    # This will not be considered for correction.
-    df = df.query('n_reads_correct>=@min_n_reads and n_reads_correct>=10*n_reads_degenerated')
+    # Remove spikeins
+    if spikeins is not None:
+        spikes = pd.read_csv(spikeins, index_col=0).index
+        GBC_counts = GBC_counts.loc[~GBC_counts.index.isin(spikes)]
 
-    # To the remaining correct GBCs, add counts from the corresponding degenerated barcodes 
-    # NB: not from all of them, but only the ones at <= <treshold> hamming distance
-    correction_df = df.groupby('correct').apply(lambda x: process_one_GBC(x, threshold))
-    GBC_counts.loc[correction_df.index] = correction_df['n_reads_after_correction']
-
-    # Annotate GBC_counts
+    # Get final GBC pool
     GBC_counts = GBC_counts.to_frame('read_count')
-    L = [
-        GBC_counts.index.isin(correction_df.index),
-        GBC_counts.index.isin(df['correct']) & ~GBC_counts.index.isin(correction_df.index),
-        GBC_counts.index.isin(df.query('hamming<=@threshold')['degenerated']),
-        GBC_counts.index.isin(df.query('hamming>@threshold')['degenerated'])
+    correct = df['correct'].unique()
+    degenerated = df['degenerated'].unique()
+    non_clustered = GBC_counts.index[
+        ~GBC_counts.index.isin(np.concatenate([degenerated, correct]))
     ]
-    values = [ 'corrected', 'discarded', 'degenerated_to_remove', 'degenerated_not_to_remove' ]
-    GBC_counts['status'] = np.select(L, values, default='not_whitelisted')
+    final_pool = GBC_counts.index[
+        GBC_counts.index.isin(correct) | (GBC_counts.index.isin(non_clustered))
+    ]
+    assert final_pool.size == (correct.size + non_clustered.size)
 
-    # Save
-    GBC_counts.to_csv(os.path.join(path_o, 'GBC_counts.csv'))
-    correction_df.to_csv(os.path.join(path_o, 'correction_df.csv'))
-    df.to_csv(os.path.join(path_o, 'whitelist.csv'))
+    # Final counts
+    final_counts = pd.DataFrame(0, index=final_pool, columns=['read_count'])
+    final_counts.loc[non_clustered, 'read_count'] = GBC_counts.loc[non_clustered, 'read_count']
+    final_counts.loc[correct, 'read_count'] = corrected_counts.loc[correct]
+
+    # Filter min_n_reads, and save
+    (
+        final_counts
+        .query('read_count>=@min_n_reads')
+        .to_csv(os.path.join(path_o, 'GBC_counts_corrected.csv'))
+    )
 
 
 ##
