@@ -3,7 +3,6 @@
 nextflow.enable.dsl = 2
 include { bulk } from "./subworkflows/bulk/main"
 include { sc } from "./subworkflows/sc/main"
-include { onerun } from "./subworkflows/onerun/main"
 
 //
 
@@ -22,16 +21,10 @@ ch_input_sc_gbc = Channel
     .fromPath("${params.sc_gbc}/*", type:'dir')
     .map{ tuple(it.getName(), it) }
 
-// Input map bulk-sc
-map_bulk_sc = Channel
-    .fromPath("${params.bulk_sc_map}")
-    .splitCsv(skip:1)
-    .map{ tuple(it[0], it[1]) }
-
 //
 
 //----------------------------------------------------------------------------//
-// Perturb-seq pipeline entry points and main workflow: UMI_tools_graph_clustering
+// Perturb-seq pipeline entry points and main workflow: bulk_is_the_key
 //----------------------------------------------------------------------------//
 
 workflow bulk_only {
@@ -54,12 +47,7 @@ workflow sc_only {
 
 workflow {
 
-    onerun(
-        ch_input_bulk, 
-        ch_input_sc_tenx, 
-        ch_input_sc_gbc, 
-        map_bulk_sc
-    )
+    Channel.of(1,2,3,4) | view
 
 }
 

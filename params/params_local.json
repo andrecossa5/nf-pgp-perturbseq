@@ -12,7 +12,7 @@
     "sc_tenx" : "/Users/IEO5505/Desktop/example_perturb/data/perturb_tenx/",
     "sc_outdir" : "/Users/IEO5505/Desktop/example_perturb/results/perturb_sc/",
     "sc_anchor" : "TAGCAAACTGGGGCACAAGCTTAATTAAGAATT",
-    "sc_anchor_treshold" : 3,
+    "sc_anchor_treshold" : 1,
     "cell_assignment_method" : "unique_combos",
     "ref" : "/Users/IEO5505/Desktop/example_perturb/meta/ref",
     "whitelist" : "/Users/IEO5505/Desktop/example_perturb/meta/whitelist.txt"

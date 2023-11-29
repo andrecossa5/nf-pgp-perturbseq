@@ -9,7 +9,7 @@ BULK DNA libraries
 - Extract GBC reads (<=1 mismatch from DNA anchor sequence).
 - Graph-based correction. Unique GBC sequences (>1 read) are clustered and read counts from degenerate
   sequences are passed to the "correct" ones. Spikeins are removed and resulting GBC sequences are filtered 
-  (read_counts > bulk_min_n_reads).
+  for "correct" or "unique" sequences with read_counts > bulk_min_n_reads.
 - Reference GBC pool construction. A reference GBC whitelist is obtained from all samples.
 - (Optional) clone calling step from bulk DNA. Two methods implemented: a. uses spike-ins
   information, and b. does not, relying on distributional properties of the GBC-sequences
