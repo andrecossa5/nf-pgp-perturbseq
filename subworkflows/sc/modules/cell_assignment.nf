@@ -21,7 +21,7 @@ process CELL_ASSIGNMENT {
   """
   python ${baseDir}/bin/sc/cell_assignment.py \
   --sample ${sample_name} \
-  --path_bulk ${params.bulk_outdir}/summary/bulk_GBC_reference.csv \ 
+  --path_bulk ${params.bulk_outdir} \
   --path_sc ${elements} \
   --method ${params.cell_assignment_method} \
   --ncores ${task.cpus} \

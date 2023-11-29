@@ -159,7 +159,10 @@ import matplotlib.pyplot as plt
 def main():
 
     # Bulk reference
-    bulk = pd.read_csv(path_bulk, index_col=0, header=None)
+    bulk = pd.read_csv(
+        os.path.join(path_bulk, 'summary', 'bulk_GBC_reference.csv'),
+        index_col=0, header=None
+    )
 
     # Read single-cell read elements, reverse-complement GBCs and count reads
     sc_df = dd.read_csv(path_sc, sep='\t', header=None)
