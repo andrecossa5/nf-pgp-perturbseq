@@ -179,7 +179,9 @@ def main():
     sc_A = to_numeric(np.vstack(sc.index.map(lambda x: np.array(list(x)))))
     bulk_A = to_numeric(np.vstack(bulk.index.map(lambda x: np.array(list(x)))))
     D = pairwise_distances(sc_A, bulk_A, metric='hamming', n_jobs=int(ncores)) * sc_A.shape[1]
-    d_correction = sc.to_frame('read_count')
+    print(type(sc))
+    print(sc.dtype)
+    
     d_correction = (
         d_correction
         .assign(
