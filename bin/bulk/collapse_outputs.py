@@ -74,12 +74,11 @@ def main():
 	            sample = os.path.basename(root)
 	            d[sample] = (
 					pd.read_csv(os.path.join(root, file), index_col=0)
-					.index.to_list()
+					.assign(sample=sample)
 				)
 
-	# Final pool
-	final_pool = reduce(lambda x,y: set(x)|set(y), d.values())
-	pd.Series(list(final_pool)).to_csv('bulk_GBC_reference.csv', header=False, index=False)
+	# Final reference
+	pd.concat(d.values()).to_csv('bulk_GBC_reference.csv')
 
 	# Common clones
 	n = len(d)
