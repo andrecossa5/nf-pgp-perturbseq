@@ -181,6 +181,11 @@ def main():
     D = pairwise_distances(sc_A, bulk_A, metric='hamming', n_jobs=int(ncores)) * sc_A.shape[1]
     d_correction = sc.to_frame().reset_index(drop=True)
     d_correction.columns = ['read_count']
+    print(type(d_correction))
+    print(d_correction.head())
+    import sys
+    sys.exit()
+    
     d_correction = (
         d_correction
         .assign(
