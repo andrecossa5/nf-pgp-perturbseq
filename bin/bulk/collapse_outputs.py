@@ -52,7 +52,6 @@ path_output = args.output
 # Import code
 import numpy as np
 import pandas as pd
-from functools import reduce
 
 ##
 
@@ -95,5 +94,4 @@ def main():
 
 # Run 
 if __name__ == '__main__':
-
 	main()

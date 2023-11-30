@@ -46,6 +46,14 @@ my_parser.add_argument(
 
 # treshold
 my_parser.add_argument(
+    '--bulk_sc_sample_map',
+    type=str,
+    default=None,
+    help='Path to bulk_sc_sample_map. Default: None.'
+)
+
+# treshold
+my_parser.add_argument(
     '--method',
     type=str,
     default='unique_combos',
@@ -103,6 +111,7 @@ my_parser.add_argument(
 args = my_parser.parse_args()
 sample = args.sample
 path_bulk = args.path_bulk
+bulk_sc_sample_map = args.bulk_sc_sample_map
 path_sc = args.path_sc
 method = args.method
 ncores = int(args.ncores)
@@ -161,7 +170,7 @@ def main():
     # Bulk reference
     bulk = pd.read_csv(
         os.path.join(path_bulk, 'summary', 'bulk_GBC_reference.csv'),
-        index_col=0, header=None
+        index_col=0
     )
 
     # Read single-cell read elements, reverse-complement GBCs and count reads
