@@ -2,7 +2,6 @@
 
     "bulk_indir" : "/hpcnfs/scratch/PGP/acossa/nf-perturbseq/tests/pp/data/perturb_bulk/",
     "bulk_outdir" : "/hpcnfs/scratch/PGP/acossa/nf-perturbseq/tests/pp/results/perturb_bulk/",
-    "bulk_sc_map" : "/hpcnfs/scratch/PGP/acossa/nf-perturbseq/tests/pp/data/bulk_sc_map.csv",
     "bulk_graph_clustering_hamming_treshold" : 3,
     "bulk_min_n_reads" : 1000,
     "bulk_anchor_sequence" : "GGGTTTAAACGGGCCCTCTAG",

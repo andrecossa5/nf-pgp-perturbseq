@@ -2,7 +2,6 @@
 
     "bulk_indir" : "/Users/IEO5505/Desktop/example_perturb/data/perturb_bulk/",
     "bulk_outdir" : "/Users/IEO5505/Desktop/example_perturb/results/perturb_bulk/",
-    "bulk_sc_map" : "/Users/IEO5505/Desktop/example_perturb/data/bulk_sc_map.csv",
     "bulk_graph_clustering_hamming_treshold" : 3,
     "bulk_min_n_reads" : 1000,
     "bulk_anchor_sequence" : "GGGTTTAAACGGGCCCTCTAG",
