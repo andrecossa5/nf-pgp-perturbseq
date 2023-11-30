@@ -25,6 +25,7 @@ ch_input_sc_gbc = Channel
 
 //----------------------------------------------------------------------------//
 // Perturb-seq pipeline entry points and main workflow: bulk_is_the_key
+// Stable, no one_run e bulk_clone calling
 //----------------------------------------------------------------------------//
 
 workflow bulk_only {
