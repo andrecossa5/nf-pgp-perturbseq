@@ -181,20 +181,25 @@ def main():
     D = pairwise_distances(sc_A, bulk_A, metric='hamming', n_jobs=int(ncores)) * sc_A.shape[1]
     d_correction = sc.to_frame().reset_index(drop=True)
     d_correction.columns = ['read_count']
-    print(type(d_correction))
-    print(d_correction.head())
-    import sys
-    sys.exit()
-    
+
     d_correction = (
         d_correction
         .assign(
             correct_GBC=[ bulk.index[i] for i in D.argmin(axis=1) ],
             hamming=D.min(axis=1),
         )
-        .query('hamming<=@bulk_sc_treshold')
-        ['correct_GBC'].to_dict()
     )
+
+    print(type(d_correction))
+    print(d_correction.head())
+
+    import sys
+    sys.exit()
+
+    # .query('hamming<=@bulk_sc_treshold')
+    # ['correct_GBC'].to_dict()
+    # )
+    
     sc_df['GBC'] = sc_df['GBC'].map(
         lambda x: d_correction[x] if x in d_correction else 'not_found'     # Correct
     )
