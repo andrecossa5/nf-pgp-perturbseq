@@ -23,6 +23,7 @@ process CELL_ASSIGNMENT {
   --sample ${sample_name} \
   --path_bulk ${params.bulk_outdir} \
   --path_sc ${elements} \
+  --sample_map ${params.sample_map} \
   --method ${params.cell_assignment_method} \
   --ncores ${task.cpus} \
   --bulk_sc_treshold ${params.bulk_sc_treshold} \

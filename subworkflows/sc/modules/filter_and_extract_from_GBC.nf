@@ -16,7 +16,7 @@ process GET_GBC_ELEMENTS {
 
   script:
   """
-  python ${baseDir}/bin/sc/filter_and_extact_from_GBC_reads.py \
+  python ${baseDir}/bin/sc/get_CBC_GBC_UMI.py \
   ${R1} ${R2} ${filtered} ${params.sc_anchor} ${params.sc_anchor_treshold}
   """
 

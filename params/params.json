@@ -8,6 +8,8 @@
     "bulk_anchor_sequence" : "GGGTTTAAACGGGCCCTCTAG",
     "spikeins_table" : "/hpcnfs/scratch/PGP/acossa/nf-perturbseq/tests/meta/spikeins_table.csv",
 
+    "sample_map" : "/hpcnfs/scratch/PGP/acossa/nf-perturbseq/tests/meta/sample_map.csv",
+
     "sc_gbc" : "/hpcnfs/scratch/PGP/acossa/nf-perturbseq/tests/pp/data/perturb_gbc/",
     "sc_tenx" : "/hpcnfs/scratch/PGP/acossa/nf-perturbseq/tests/pp/data/perturb_tenx/",
     "sc_outdir" : "/hpcnfs/scratch/PGP/acossa/nf-perturbseq/tests/pp/results/perturb_sc/",

@@ -8,6 +8,8 @@
     "bulk_anchor_sequence" : "GGGTTTAAACGGGCCCTCTAG",
     "spikeins_table" : "/Users/IEO5505/Desktop/example_perturb/meta/spikeins_table.csv",
     
+    "sample_map" : "/Users/IEO5505/Desktop/example_perturb/meta/sample_map.csv",
+
     "sc_gbc" : "/Users/IEO5505/Desktop/example_perturb/data/perturb_gbc/",
     "sc_tenx" : "/Users/IEO5505/Desktop/example_perturb/data/perturb_tenx/",
     "sc_outdir" : "/Users/IEO5505/Desktop/example_perturb/results/perturb_sc/",

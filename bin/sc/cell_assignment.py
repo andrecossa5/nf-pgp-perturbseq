@@ -46,10 +46,10 @@ my_parser.add_argument(
 
 # treshold
 my_parser.add_argument(
-    '--bulk_sc_sample_map',
+    '--sample_map',
     type=str,
     default=None,
-    help='Path to bulk_sc_sample_map. Default: None.'
+    help='Path to sample_map. Default: None.'
 )
 
 # treshold
@@ -111,7 +111,7 @@ my_parser.add_argument(
 args = my_parser.parse_args()
 sample = args.sample
 path_bulk = args.path_bulk
-bulk_sc_sample_map = args.bulk_sc_sample_map
+path_sample_map = args.sample_map
 path_sc = args.path_sc
 method = args.method
 ncores = int(args.ncores)
@@ -167,11 +167,14 @@ import matplotlib.pyplot as plt
 
 def main():
 
-    # Bulk reference
+    # Get the right reference sequences from bulk_GBC_reference
     bulk = pd.read_csv(
         os.path.join(path_bulk, 'summary', 'bulk_GBC_reference.csv'),
         index_col=0
     )
+    sample_map = pd.read_csv(path_sample_map, index_col=0)
+    ref = sample_map.loc[sample, 'reference']
+    bulk = bulk.query('sample==@ref')
 
     # Read single-cell read elements, reverse-complement GBCs and count reads
     sc_df = dd.read_csv(path_sc, sep='\t', header=None)
