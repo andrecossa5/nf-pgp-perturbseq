@@ -15,9 +15,10 @@
     "sc_anchor" : "TAGCAAACTGGGGCACAAGCTTAATTAAGAATT",
     "sc_anchor_treshold" : 1,
     "bulk_sc_treshold" : 1,
-    "umi_treshold" : 5,
+    "umi_treshold" : 3,
     "read_treshold" : 15,
-    "coverage_treshold" : 3, 
+    "coverage_treshold" : 5,
+    "ratio_to_most_abundant_treshold" : 0.3,
     "cell_assignment_method" : "unique_combos",
     "whitelist" : "/hpcnfs/data/PGP/reference_genomes/custom/10x_whitelists/v3.txt",
     "ref" : "/hpcnfs/data/PGP/reference_genomes/custom/STARsolo_new/"

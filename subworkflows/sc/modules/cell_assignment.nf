@@ -29,7 +29,8 @@ process CELL_ASSIGNMENT {
   --bulk_sc_treshold ${params.bulk_sc_treshold} \
   --umi_treshold ${params.umi_treshold} \
   --read_treshold ${params.read_treshold} \
-  --coverage_treshold ${params.coverage_treshold}
+  --coverage_treshold ${params.coverage_treshold} \
+  --ratio_to_most_abundant_treshold ${params.ratio_to_most_abundant_treshold}
   """
 
   stub:
