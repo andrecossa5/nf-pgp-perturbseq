@@ -105,11 +105,11 @@ sample = args.sample
 path_bulk = args.path_bulk
 path_sc = args.path_sc
 method = args.method
-ncores = args.ncores
-bulk_sc_treshold = args.bulk_sc_treshold
-umi_treshold = args.umi_treshold
-read_treshold = args.read_treshold
-coverage_treshold = args.coverage_treshold
+ncores = int(args.ncores)
+bulk_sc_treshold = int(args.bulk_sc_treshold)
+umi_treshold = int(args.umi_treshold)
+read_treshold = int(args.read_treshold)
+coverage_treshold = int(args.coverage_treshold)
 
 
 ##
@@ -179,27 +179,15 @@ def main():
     sc_A = to_numeric(np.vstack(sc.index.map(lambda x: np.array(list(x)))))
     bulk_A = to_numeric(np.vstack(bulk.index.map(lambda x: np.array(list(x)))))
     D = pairwise_distances(sc_A, bulk_A, metric='hamming', n_jobs=int(ncores)) * sc_A.shape[1]
-    d_correction = sc.to_frame().reset_index(drop=True)
-    d_correction.columns = ['read_count']
-
     d_correction = (
-        d_correction
+        sc.to_frame('read_count')
         .assign(
             correct_GBC=[ bulk.index[i] for i in D.argmin(axis=1) ],
             hamming=D.min(axis=1),
         )
         .query('hamming<=@bulk_sc_treshold')
+        ['correct_GBC'].to_dict()
     )
-
-    print(type(d_correction))
-    print(d_correction.head())
-
-    import sys
-    sys.exit()
-
-    # ['correct_GBC'].to_dict()
-    # )
-
     sc_df['GBC'] = sc_df['GBC'].map(
         lambda x: d_correction[x] if x in d_correction else 'not_found'     # Correct
     )
