@@ -188,6 +188,7 @@ def main():
             correct_GBC=[ bulk.index[i] for i in D.argmin(axis=1) ],
             hamming=D.min(axis=1),
         )
+        .query('hamming<=@bulk_sc_treshold')
     )
 
     print(type(d_correction))
@@ -196,10 +197,9 @@ def main():
     import sys
     sys.exit()
 
-    # .query('hamming<=@bulk_sc_treshold')
     # ['correct_GBC'].to_dict()
     # )
-    
+
     sc_df['GBC'] = sc_df['GBC'].map(
         lambda x: d_correction[x] if x in d_correction else 'not_found'     # Correct
     )
