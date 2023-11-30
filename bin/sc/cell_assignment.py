@@ -71,7 +71,7 @@ my_parser.add_argument(
 # Spikeins
 my_parser.add_argument(
     '--bulk_sc_treshold',
-    type=str,
+    type=int,
     default=1,
     help='''
     Hamming distance treshold to consider a sc GBC a "degenerate" sequence with respect 
@@ -82,7 +82,7 @@ my_parser.add_argument(
 # Spikeins
 my_parser.add_argument(
     '--umi_treshold',
-    type=str,
+    type=int,
     default=5,
     help='Min number of UMIs to consider a CB-GBC combination supported. Default: 5.'
 )
@@ -90,7 +90,7 @@ my_parser.add_argument(
 # Spikeins
 my_parser.add_argument(
     '--read_treshold',
-    type=str,
+    type=int,
     default=15,
     help='Min number of reads to consider a CB-GBC combination supported. Default: 15.'
 )
@@ -98,7 +98,15 @@ my_parser.add_argument(
 # Spikeins
 my_parser.add_argument(
     '--coverage_treshold',
-    type=str,
+    type=int,
+    default=3,
+    help='Min coverage (nUMIs / nreads) to consider a CB-GBC combination supported. Default: 3.'
+)
+
+# ratio_to_most_abundant_treshold
+my_parser.add_argument(
+    '--ratio_to_most_abundant_treshold',
+    type=float,
     default=3,
     help='Min coverage (nUMIs / nreads) to consider a CB-GBC combination supported. Default: 3.'
 )
@@ -114,11 +122,12 @@ path_bulk = args.path_bulk
 path_sample_map = args.sample_map
 path_sc = args.path_sc
 method = args.method
-ncores = int(args.ncores)
-bulk_sc_treshold = int(args.bulk_sc_treshold)
-umi_treshold = int(args.umi_treshold)
-read_treshold = int(args.read_treshold)
-coverage_treshold = int(args.coverage_treshold)
+ncores = args.ncores
+bulk_sc_treshold = args.bulk_sc_treshold
+umi_treshold = args.umi_treshold
+read_treshold = args.read_treshold
+coverage_treshold = args.coverage_treshold
+ratio_to_most_abundant_treshold = args.ratio_to_most_abundant_treshold
 
 
 ##
@@ -173,8 +182,17 @@ def main():
         index_col=0
     )
     sample_map = pd.read_csv(path_sample_map, index_col=0)
-    ref = sample_map.loc[sample, 'reference']
-    bulk = bulk.query('sample==@ref')
+
+    if sample in sample_map.index:
+        ref = sample_map.loc[sample, 'reference']
+        bulk = bulk.query('sample==@ref')
+        assert bulk.shape[0]>0
+        print(f'Found bulk GBC sequences for the {sample} sample, from ref {ref}.')
+
+    else:
+        raise KeyError(
+            f'{sample} is not present in sample_map.csv index. Check errors.'
+        )
 
     # Read single-cell read elements, reverse-complement GBCs and count reads
     sc_df = dd.read_csv(path_sc, sep='\t', header=None)
@@ -207,28 +225,36 @@ def main():
 
     ##
 
-    # Compute sc CBC-GBCs combos
+    # Compute sc CBC-GBCs combos and related stats
+    grouped_sc_df = sc_df.groupby(['CBC', 'GBC'])
     df_combos = (
-        sc_df.groupby(['CBC', 'GBC']).size().compute().to_frame('read_counts')
+        grouped_sc_df.size().compute().to_frame('read_counts')
         .join(
-            sc_df.groupby(['CBC', 'GBC', 'UMI']).size().compute().to_frame('umi_counts')
+            grouped_sc_df['UMI'].nunique().compute().to_frame('umi_counts')
         )
         .reset_index()
     )
     df_combos['coverage'] = df_combos['read_counts'] / df_combos['umi_counts']
+    df_combos = df_combos.join(
+        df_combos
+        .groupby('CBC')
+        .apply(lambda x: x['umi_counts'] / x['umi_counts'].max())
+        .droplevel(0)
+        .to_frame('ratio_to_most_abundant')
+    )
     df_combos.to_csv('CBC_GBC_combos.tsv.gz', sep='\t')
 
-
+    
     ##
 
 
-    # Cell assignment
-
-    # Cell assignment, only unique combos
+    # Subset CBC-GBC combinations
     test = (df_combos['read_counts'] >= read_treshold) & \
            (df_combos['umi_counts'] >= umi_treshold) & \
-           (df_combos['coverage'] >= coverage_treshold) 
+           (df_combos['coverage'] >= coverage_treshold) & \
+           (df_combos['ratio_to_most_abundant'] >= ratio_to_most_abundant_treshold)
     df_combos['status'] = np.where(test, 'supported', 'unsupported')
+
 
     ##
 
