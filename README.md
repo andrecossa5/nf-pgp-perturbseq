@@ -7,25 +7,26 @@ Major steps:
 BULK DNA libraries
 
 - Extract GBC reads (<=1 mismatch from DNA anchor sequence).
-- Graph-based correction. Unique GBC sequences (>1 read) are clustered and read counts from degenerate
-  sequences are passed to the "correct" ones. Spikeins are removed and resulting GBC sequences are filtered 
-  for "correct" or "unique" sequences with read_counts > bulk_min_n_reads.
+- Graph-based correction. Unique GBC sequences (>1 read) are clustered, and read counts from "degenerate"
+  sequences are passed to "correct" ones. Spikeins are removed, and remaining GBC sequences are filtered 
+  to retain only "correct" and "uniquely observed" sequences, with read_counts > bulk_min_n_reads.
 - Reference GBC pool construction. A reference GBC whitelist is obtained from all samples.
 - (Optional) clone calling step from bulk DNA. Two methods implemented: a. uses spike-ins
-  information, and b. does not, relying on distributional properties of the GBC-sequences
-  read counts only. 
+  information, and b. does not, relying only distributional properties of the GBC sequences
+  read counts. 
 
-Note: MOI of lentiviral infection must be very low (e.g., <= 0.1) to retrieve clones from bulk DNA-sequencing, to ensure one GBC <--> one clone. 
+Note: MOI of lentiviral infection must be very low (e.g., <= 0.1) to retrieve clones from bulk DNA-sequencing, to ensure a GBCs-clones one-to-one mapping. 
 
 SC libraries (10X and GBC reads)
 
 - Solo alignment of 10x reads
-- GBC reads element extraction (<= 2 mismatch from RNA anchor sequence), using only reads from
-  putative cells (Solo-corrected CBs).
-- Bulk-reference-based GBC filtering, correction and CB-GBC UMI table computation. SC CB-UMI-GBC
-  combinations with GBC matching a unique, "correct" bulk GBC (1-2 max mismatches allowed) are filtered and (if necessary) corrected. Outliers CB (too high/low GBCs counts) are removed. Highly supported CB-GBC combinations (>=30 reads, >=5 UMIs and >=10 coverage) are filtered, 
-  and used to compute a CB-GBC UMI table. 
-- Clone calling. Unique GBCs-combinations in the CB-GBC UMI table are computed, and individual CBs
-  are assigned to them. GBCs-combinations with one or more of their GBCs shared by other GBCs-combinations are filtered out (un-realistic combinations from multiple identical viral particles infecting independet cells). The remaining GBCs-combinations are considered clones.
+- GBC reads elements (i.e., CBC, GBC and UMI) extraction (<= 1 mismatch from cDNA anchor sequence) extraction.
+  Only reads from putative cells (Solo-corrected CBC, passing Solo cell calling) are retained in this step.
+- Bulk-reference-based GBC correction, filtering and CBC-GBC table computation. Single-cell CBC-UMI-GBC
+  combinations with GBC matching a unique, "correct" bulk GBC (1 max mismatches allowed) are filtered and (if necessary) corrected to the bulk reference sequence. Highly supported CB-GBC combinations (>=15 reads, >=5 UMIs, >=3 coverage
+  and umi counts ratio with most abundant GBC for a certain CBC >=.3) are filtered, and used to compute a CB-GBC
+  UMI table. 
+- Clone calling. Unique GBCs-combinations are from computed the CB-GBC UMI table, and individual CBs
+  are assigned to them.
 - Cell assignment. CB assigned to the final pool of GBCs-combinations are assigned the respective
   clonal identity. Clonal frequencies are computed after this step, using assigned cell counts.     

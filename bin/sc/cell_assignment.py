@@ -258,6 +258,7 @@ def main():
 
     ##
 
+    
     # Combinations support plot
     fig, ax = plt.subplots()
     x = np.log10(df_combos['read_counts'])
@@ -317,6 +318,7 @@ def main():
         M[M.isna()] = 0
         cells_with_unique_combos = M.apply(lambda x: frozenset(M.columns[x>0]), axis=1)
         clones_df = cells_with_unique_combos.value_counts(normalize=True)
+        clones_df.index = clones_df.index.map(lambda x: ';'.join(x))
         clones_df = (
             clones_df
             .to_frame('clonal_prevalence').reset_index()
