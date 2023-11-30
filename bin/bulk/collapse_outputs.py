@@ -85,7 +85,7 @@ def main():
 	for i,x in enumerate(d.keys()):
 		for j,y in enumerate(d.keys()):
 			if i>=j:
-				C[i,j] = C[j,i] = len(set(d[x])&set(d[y]))		
+				C[i,j] = C[j,i] = len(set(d[x].index)&set(d[y].index))		
 	pd.DataFrame(C, index=d.keys(), columns=d.keys()).to_csv('common.csv')
 	
 	##
