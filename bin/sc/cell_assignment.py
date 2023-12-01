@@ -244,6 +244,8 @@ def main():
         .to_frame('ratio_to_most_abundant')
     )
     df_combos.to_csv('CBC_GBC_combos.tsv.gz', sep='\t')
+    # df_combos = pd.read_csv('CBC_GBC_combos.tsv.gz', sep='\t', index_col=0)
+    # df_combos = df_combos.query('GBC != "CGGAAGTCCATCCCCTCG"')
 
         
     ##
