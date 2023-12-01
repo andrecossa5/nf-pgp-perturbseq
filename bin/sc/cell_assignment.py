@@ -129,30 +129,25 @@ read_treshold = args.read_treshold
 coverage_treshold = args.coverage_treshold
 ratio_to_most_abundant_treshold = args.ratio_to_most_abundant_treshold
 
+##
+
+# path_sc = '/Users/IEO5505/Desktop/PD/tmp_sc/GBC_read_elements.tsv.gz'
+# sample = 'X'
+# path_bulk = '/Users/IEO5505/Desktop/PD/tmp_bulk/bulk_GBC_reference.csv'
+# path_sample_map = None
+# method = 'unique_combos'
+# ncores = 8
+# bulk_sc_treshold = 1
+# umi_treshold = 5
+# read_treshold = 30
+# coverage_treshold = 10
+# ratio_to_most_abundant_treshold = .3
+# os.chdir('/Users/IEO5505/Desktop/PD/tmp_sc')
 
 ##
 
 
 # Utils
-def _rev(x):
-    d = {'A':'T', 'G':'C', 'T':'A', 'C':'G', 'N':'N'}
-    x = list(x)
-    rev_x = []
-    for i in range(len(x)):
-        rev_x.append(d[x[i]])
-    return ''.join(rev_x)[::-1]
-
-
-##
-
-
-def rev_complement(s):
-    return s.map(_rev)
-
-
-##
-
-
 def to_numeric(X):
     return np.select([X=='A', X=='T', X=='C', X=='G'], [1,2,3,4], default=0)
 
@@ -164,7 +159,6 @@ def to_numeric(X):
 import pandas as pd
 import numpy as np
 import pandas as pd
-import dask.dataframe as dd
 from sklearn.metrics import pairwise_distances
 import matplotlib.pyplot as plt
 
@@ -181,35 +175,42 @@ def main():
         os.path.join(path_bulk, 'summary', 'bulk_GBC_reference.csv'),
         index_col=0
     )
-    sample_map = pd.read_csv(path_sample_map, index_col=0)
 
-    if sample in sample_map.index:
-        ref = sample_map.loc[sample, 'reference']
-        bulk = bulk.query('sample==@ref')
-        assert bulk.shape[0]>0
-        print(f'Found bulk GBC sequences for the {sample} sample, from ref {ref}.')
+    if path_sample_map is not None:
+        sample_map = pd.read_csv(path_sample_map, index_col=0)
+        if sample in sample_map.index:
+            ref = sample_map.loc[sample, 'reference']
+            bulk = bulk.query('sample==@ref')
+            assert bulk.shape[0]>0
+            print(f'Found bulk GBC sequences for the {sample} sample, from ref {ref}.')
+        else:
+            raise KeyError(
+                f'{sample} is not present in sample_map.csv index. Check errors.'
+            )
 
-    else:
-        raise KeyError(
-            f'{sample} is not present in sample_map.csv index. Check errors.'
-        )
-
-    # Read single-cell read elements, reverse-complement GBCs and count reads
-    sc_df = dd.read_csv(path_sc, sep='\t', header=None)
+    # Reverse complement and value_counts
+    sc_df = pd.read_csv(path_sc, sep='\t', header=None, dtype='str')
     sc_df.columns = ['name', 'CBC', 'UMI', 'GBC']
-    sc_df['GBC'] = sc_df['GBC'].map_partitions(rev_complement, meta=('GBC', 'str'))
-    sc = sc_df['GBC'].value_counts().compute()
+    d_rev = {'A':'T', 'G':'C', 'T':'A', 'C':'G', 'N':'N'}
+    sc_df['GBC'] = sc_df['GBC'].map(lambda x: ''.join([ d_rev[x] for x in reversed(x) ]))
+    sc = sc_df['GBC'].value_counts()
 
-    
+ 
     ##
 
     
-    # Map sc GBCs to bulk GBCs: if hamming <=bulk_sc_treshold, correct sc GBCs to bulk GBCs
-    # else, discard the read supporting that CBC-GBC combination
-    sc_A = to_numeric(np.vstack(sc.index.map(lambda x: np.array(list(x)))))
-    bulk_A = to_numeric(np.vstack(bulk.index.map(lambda x: np.array(list(x)))))
-    D = pairwise_distances(sc_A, bulk_A, metric='hamming', n_jobs=int(ncores)) * sc_A.shape[1]
-    d_correction = (
+    # Map sc GBCs to bulk GBCs
+
+    # Calculate hamming distance single-cell GBCs vs bulk reference GBCs
+    sc_numeric = to_numeric(np.vstack(sc.index.map(lambda x: np.array(list(x)))))
+    bulk_numeric = to_numeric(np.vstack(bulk.index.map(lambda x: np.array(list(x)))))
+    D = pairwise_distances(
+        sc_numeric, bulk_numeric, metric='hamming', n_jobs=int(ncores)
+    ) * sc_numeric.shape[1]
+
+    # Build a correction dict for sc GBCs at hamming distance <= bulk_sc_treshold
+    # from a bulk one.
+    d_corr = (
         sc.to_frame('read_count')
         .assign(
             correct_GBC=[ bulk.index[i] for i in D.argmin(axis=1) ],
@@ -218,23 +219,23 @@ def main():
         .query('hamming<=@bulk_sc_treshold')
         ['correct_GBC'].to_dict()
     )
-    sc_df['GBC'] = sc_df['GBC'].map(
-        lambda x: d_correction[x] if x in d_correction else 'not_found'     # Correct
-    )
-    sc_df = sc_df.loc[lambda x: x['GBC']!='not_found']                      # Discard
+    # Correct GBC sequences and remove not found ones
+    sc_df['GBC'] = sc_df['GBC'].map(lambda x: d_corr[x] if x in d_corr else 'not_found' )
+    grouped = sc_df.query('GBC!="not_found"').groupby(['CBC', 'GBC'])
 
+    
     ##
 
+
     # Compute sc CBC-GBCs combos and related stats
-    grouped_sc_df = sc_df.groupby(['CBC', 'GBC'])
+    read_counts = grouped.size().to_frame('read_counts')
+    umi_counts = grouped['UMI'].nunique().to_frame('umi_counts')
     df_combos = (
-        grouped_sc_df.size().compute().to_frame('read_counts')
-        .join(
-            grouped_sc_df['UMI'].nunique().compute().to_frame('umi_counts')
-        )
+        read_counts
+        .join(umi_counts)
         .reset_index()
+        .assign(coverage=lambda x: x['read_counts']/x['umi_counts'])
     )
-    df_combos['coverage'] = df_combos['read_counts'] / df_combos['umi_counts']
     df_combos = df_combos.join(
         df_combos
         .groupby('CBC')
@@ -244,7 +245,7 @@ def main():
     )
     df_combos.to_csv('CBC_GBC_combos.tsv.gz', sep='\t')
 
-    
+        
     ##
 
 
@@ -260,13 +261,15 @@ def main():
 
     
     # Combinations support plot
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(6,5))
     x = np.log10(df_combos['read_counts'])
     y = np.log10(df_combos['umi_counts'])
     ax.plot(x[df_combos['status'] == 'supported'], 
-            y[df_combos['status'] == 'supported'], '.', label='assigned', color='blue')
+            y[df_combos['status'] == 'supported'], '.', 
+            label='assigned', color='blue', markersize=.5, zorder=10)
     ax.plot(x[df_combos['status'] == 'unsupported'],
-            y[df_combos['status'] == 'unsupported'], '.', label='not-assigned', color='grey')
+            y[df_combos['status'] == 'unsupported'], '.', 
+            label='not-assigned', color='grey', markersize=.3)
     ax.set(
         title='CBC-GBC combination status', 
         xlabel='log10_read_counts', 
@@ -317,13 +320,14 @@ def main():
         )
         M[M.isna()] = 0
         cells_with_unique_combos = M.apply(lambda x: frozenset(M.columns[x>0]), axis=1)
-        clones_df = cells_with_unique_combos.value_counts(normalize=True)
-        clones_df.index = clones_df.index.map(lambda x: ';'.join(x))
+        cells_with_unique_combos = cells_with_unique_combos.map(lambda x: ';'.join(x))
         clones_df = (
-            clones_df
-            .to_frame('clonal_prevalence').reset_index()
+            cells_with_unique_combos
+            .reset_index(drop=True)
+            .value_counts(normalize=False)
+            .to_frame('n cells').reset_index()
             .rename(columns={'index':'GBC_set'})
-            .assign(clone=[ f'C{i}_{sample}' for i in range(clones_df.shape[0]) ])
+            .assign(clone=lambda x: [ f'C{i}_{sample}' for i in range(x.shape[0]) ])
             .set_index('clone')
         )
         clones_df.to_csv('clones_summary_table.csv')
@@ -342,6 +346,7 @@ def main():
 
 
     ##
+
 
 ########################################################################
     
