@@ -39,7 +39,7 @@ for r1,r2 in fqs_in:
     a_ = r2.sequence[:33]
     gbc = r2.sequence[33:33+18]
     h = hamming(list(a_), list(anchor)) * 33
-    if cbc in solo_CBCs.index and h <= int(treshold):
+    if h <= int(treshold) and cbc in solo_CBCs.index:
         el.write(f'@{name}\t{cbc}\t{umi}\t{gbc}\n')
 
 # Close streams

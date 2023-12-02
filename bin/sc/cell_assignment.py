@@ -129,6 +129,7 @@ read_treshold = args.read_treshold
 coverage_treshold = args.coverage_treshold
 ratio_to_most_abundant_treshold = args.ratio_to_most_abundant_treshold
 
+
 ##
 
 # path_sc = '/Users/IEO5505/Desktop/PD/tmp_sc/GBC_read_elements.tsv.gz'
@@ -155,11 +156,57 @@ def to_numeric(X):
 ##
 
 
+def call_clones(
+    df_combos, sample=sample,
+    read_treshold=read_treshold, umi_treshold=umi_treshold,
+    coverage_treshold=coverage_treshold, 
+    ratio_to_most_abundant_treshold=ratio_to_most_abundant_treshold
+    ):
+    """
+    Call clones as unique GBC sequence sets, obtained from a
+    table of CBC-UMI-GBC combinations, filtered properly. 
+    """    
+    
+    # Supported and unsupported CBC-GBC combinations
+    test = (df_combos['read_counts'] >= read_treshold) & \
+        (df_combos['umi_counts'] >= umi_treshold) & \
+        (df_combos['coverage'] >= coverage_treshold) & \
+        (df_combos['ratio_to_most_abundant'] >= ratio_to_most_abundant_treshold)
+    df_combos['status'] = np.where(test, 'supported', 'unsupported')
+
+    # Pivot
+    M = (
+        df_combos
+        .query('status=="supported"')
+        .pivot_table(index='CBC', columns='GBC', values='umi_counts')
+    )
+    M[M.isna()] = 0
+
+    # Get unique GBC sets
+    cells_with_unique_combos = M.apply(lambda x: frozenset(M.columns[x>0]), axis=1)
+    cells_with_unique_combos = cells_with_unique_combos.map(lambda x: ';'.join(x))
+    clones = (
+        cells_with_unique_combos
+        .reset_index(drop=True)
+        .value_counts(normalize=False)
+        .to_frame('n cells').reset_index()
+        .rename(columns={'index':'GBC_set'})
+        .assign(clone=lambda x: [ f'C{i}_{sample}' for i in range(x.shape[0]) ])
+        .set_index('clone')
+    )
+
+    return clones, cells_with_unique_combos
+
+
+##
+
+
 # Import code
 import pandas as pd
 import numpy as np
 import pandas as pd
 from sklearn.metrics import pairwise_distances
+from itertools import chain
 import matplotlib.pyplot as plt
 
 
@@ -244,24 +291,48 @@ def main():
         .to_frame('ratio_to_most_abundant')
     )
     df_combos.to_csv('CBC_GBC_combos.tsv.gz', sep='\t')
-    # df_combos = pd.read_csv('CBC_GBC_combos.tsv.gz', sep='\t', index_col=0)
-    # df_combos = df_combos.query('GBC != "CGGAAGTCCATCCCCTCG"')
 
         
     ##
 
 
-    # Subset CBC-GBC combinations
-    test = (df_combos['read_counts'] >= read_treshold) & \
-           (df_combos['umi_counts'] >= umi_treshold) & \
-           (df_combos['coverage'] >= coverage_treshold) & \
-           (df_combos['ratio_to_most_abundant'] >= ratio_to_most_abundant_treshold)
-    df_combos['status'] = np.where(test, 'supported', 'unsupported')
+    # Cell assignment
+
+    # Call clones
+    clones, cells_with_unique_combos = call_clones(
+        df_combos, sample=sample,
+        read_treshold=read_treshold, 
+        umi_treshold=umi_treshold, 
+        coverage_treshold=coverage_treshold, 
+        ratio_to_most_abundant_treshold=ratio_to_most_abundant_treshold
+    )
+    combos = clones['GBC_set'].map(lambda x: x.split(';')).to_list()
+    unique_GBC = np.unique(list(chain.from_iterable(combos)))
+
+    # Calculate GBC sequences occurrences across these sets
+    occurrences = np.zeros((unique_GBC.size, unique_GBC.size))
+    for i,x in enumerate(unique_GBC):
+        for j,y in enumerate(unique_GBC):
+            if any([ x in c and y in c for c in combos ]):
+                occurrences[i,j] = 1
+    occurrences = pd.DataFrame(occurrences, index=unique_GBC, columns=unique_GBC)
+
+    # Assign cells to a GBC_set (i.e., clone)
+    cells = (
+        cells_with_unique_combos
+        .map(lambda x: clones.index[clones['GBC_set']==x][0])
+        .to_frame('clone')
+    )
 
 
     ##
-
     
+
+    # Save clones, cells and GBC co-occurrences
+    clones.to_csv('clones_summary_table.csv')
+    cells.to_csv('cells_summary_table.csv')
+    occurrences.to_csv('occurrences.csv')
+
     # Combinations support plot
     fig, ax = plt.subplots(figsize=(6,5))
     x = np.log10(df_combos['read_counts'])
@@ -279,72 +350,6 @@ def main():
     )
     ax.legend()
     fig.savefig('CBC_GBC_combo_status.png')
-
-
-    ##
-
-
-    # Cell assignment and clone calling
-    if method == 'unique_GBC':
-
-        # Uniquely assigned cells
-        uniquely_assigned = (
-            df_combos
-            .groupby(['CBC', 'status'])['GBC']
-            .nunique().reset_index()
-            .query('status=="supported" and GBC==1')
-            ['CBC'].unique()
-        )
-        cell_df = (
-            df_combos
-            .query('CBC in @uniquely_assigned and status=="supported"')
-            [['CBC', 'GBC']].drop_duplicates()
-            .set_index('CBC')
-            .rename(columns={'GBC':'clone'})
-        )
-        cell_df.to_csv('cells_summary_table.csv')
-        clones_df = (
-            cell_df['clone']
-            .value_counts(normalize=True)
-            .to_frame('clonal_prevalence')
-        )
-        clones_df.to_csv('clones_summary_table.csv')
-
-        ## 
-
-    elif method == 'unique_combos':
-
-        # Unique combos
-        M = (
-            df_combos
-            .query('status=="supported"')
-            .pivot_table(index='CBC', columns='GBC', values='umi_counts')
-        )
-        M[M.isna()] = 0
-        cells_with_unique_combos = M.apply(lambda x: frozenset(M.columns[x>0]), axis=1)
-        cells_with_unique_combos = cells_with_unique_combos.map(lambda x: ';'.join(x))
-        clones_df = (
-            cells_with_unique_combos
-            .reset_index(drop=True)
-            .value_counts(normalize=False)
-            .to_frame('n cells').reset_index()
-            .rename(columns={'index':'GBC_set'})
-            .assign(clone=lambda x: [ f'C{i}_{sample}' for i in range(x.shape[0]) ])
-            .set_index('clone')
-        )
-        clones_df.to_csv('clones_summary_table.csv')
-        cell_df = (
-            cells_with_unique_combos
-            .map(lambda x: clones_df.index[clones_df['GBC_set']==x][0])
-            .to_frame('clone')
-        )
-        cell_df.to_csv('cells_summary_table.csv')
-
-    else:
-
-        raise ValueError(
-            f'{method} not supported. Supported methods are unique_combos and unique_GBC.'
-        )
 
 
     ##

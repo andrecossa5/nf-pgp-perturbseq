@@ -19,7 +19,6 @@
     "read_treshold" : 15,
     "coverage_treshold" : 5,
     "ratio_to_most_abundant_treshold" : 0.3,
-    "cell_assignment_method" : "unique_combos",
     "ref" : "/Users/IEO5505/Desktop/example_perturb/meta/ref",
     "whitelist" : "/Users/IEO5505/Desktop/example_perturb/meta/whitelist.txt"
 
